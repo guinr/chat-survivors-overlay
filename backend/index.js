@@ -122,6 +122,6 @@ wss.on('connection', (ws) => {
   });
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`API rodando em http://localhost:${PORT}`);
 });
