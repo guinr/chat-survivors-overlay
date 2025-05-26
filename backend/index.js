@@ -78,7 +78,10 @@ app.get('/get-username', async (req, res) => {
     const username = userData.data?.[0]?.display_name || 'Unknown';
     console.log('Username extraído:', username);
 
-    res.json({ username });
+    res.json({ 
+      username, 
+      status: connectedPlayers.get(userId) || null
+    });
   } catch (err) {
     console.error('Erro ao buscar usuário na Twitch:', err);
     res.status(500).json({ error: 'Erro ao buscar usuário na Twitch' });

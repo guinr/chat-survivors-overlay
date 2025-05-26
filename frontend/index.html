@@ -15,20 +15,39 @@
       text-align: center;
       display: flex;
       justify-content: center;
+      align-items: center;
+      flex-direction: column;
       height: 100vh;
+    }
+    .stat {
+      font-size: 0.6em;
+      margin-top: 0.5em;
     }
   </style>
 </head>
 <body>
-  <div>Olá, <span id="username">Carregando...</span>!</div>
+  <div>
+    <div>Olá, <span id="username">Carregando...</span>!</div>
+    <div id="status" class="stat"></div>
+  </div>
 
   <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
   <script>
     const API_URL = 'https://chat-survivors-overlay-server.onrender.com';
 
-    window.Twitch.ext.onAuthorized(auth => {
-      const userId = auth.userId;
+    function renderStatus(status) {
+      if (!status) return 'Sem status disponível';
 
+      const attr = status.attributes || {};
+      return `
+        HP: ${status.actual_health} / ${status.max_health}<br/>
+        XP: ${status.experience} / ${status.experience_to_next_level}<br/>
+        Nível: ${status.level}<br/>
+        Força: ${attr.strength} | Agilidade: ${attr.agility} | Vitalidade: ${attr.vitality} | Sorte: ${attr.luck}
+      `;
+    }
+
+    window.Twitch.ext.onAuthorized(auth => {
       fetch(`${API_URL}/get-username`, {
         headers: {
           'Authorization': `Bearer ${auth.token}`
@@ -37,10 +56,12 @@
       .then(res => res.json())
       .then(data => {
         document.getElementById('username').textContent = data.username || 'Visitante';
+        document.getElementById('status').innerHTML = renderStatus(data.status);
       })
       .catch(err => {
         console.error('Erro ao buscar usuário:', err);
         document.getElementById('username').textContent = 'Erro';
+        document.getElementById('status').textContent = 'Erro ao carregar status';
       });
     });
   </script>
