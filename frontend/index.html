@@ -1,69 +1,69 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Overlay Twitch</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: transparent;
-      color: white;
-      font-family: sans-serif;
-      font-size: 2em;
-      text-align: center;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      height: 100vh;
-    }
-    .stat {
-      font-size: 0.6em;
-      margin-top: 0.5em;
-    }
-  </style>
-</head>
-<body>
-  <div>
-    <div>Olá, <span id="username">Carregando...</span>!</div>
-    <div id="status" class="stat"></div>
-  </div>
+<script>
+  const API_URL = 'https://chat-survivors-overlay-server.onrender.com';
+  let userId = null;
+  let ws;
 
-  <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
-  <script>
-    const API_URL = 'https://chat-survivors-overlay-server.onrender.com';
+  function renderStatus(status) {
+    if (!status) return 'Sem status disponível';
 
-    function renderStatus(status) {
-      if (!status) return 'Sem status disponível';
+    const attr = status.attributes || {};
+    return `
+      HP: ${status.actual_health} / ${status.max_health}<br/>
+      XP: ${status.experience} / ${status.experience_to_next_level}<br/>
+      Nível: ${status.level}<br/>
+      Força: ${attr.strength} | Agilidade: ${attr.agility} | Vitalidade: ${attr.vitality} | Sorte: ${attr.luck}
+    `;
+  }
 
-      const attr = status.attributes || {};
-      return `
-        HP: ${status.actual_health} / ${status.max_health}<br/>
-        XP: ${status.experience} / ${status.experience_to_next_level}<br/>
-        Nível: ${status.level}<br/>
-        Força: ${attr.strength} | Agilidade: ${attr.agility} | Vitalidade: ${attr.vitality} | Sorte: ${attr.luck}
-      `;
-    }
+  function connectWebSocket() {
+    ws = new WebSocket('wss://chat-survivors-overlay-server.onrender.com'); // troque para seu WS URL real
 
-    window.Twitch.ext.onAuthorized(auth => {
-      fetch(`${API_URL}/get-username`, {
+    ws.onopen = () => {
+      console.log('WS conectado, enviando userId:', userId);
+      // Opcional: pode enviar algo para avisar quem é
+      // Se seu backend quiser receber algo do client, adapte aqui
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.action === 'status_broadcast' && data.userId === userId) {
+        console.log('Status atualizado recebido via WS:', data.status);
+        document.getElementById('status').innerHTML = renderStatus(data.status);
+      }
+    };
+
+    ws.onerror = (err) => {
+      console.error('WS erro:', err);
+    };
+
+    ws.onclose = () => {
+      console.log('WS fechado. Tentando reconectar em 3s...');
+      setTimeout(connectWebSocket, 3000);
+    };
+  }
+
+  window.Twitch.ext.onAuthorized(async (auth) => {
+    // Decodifica o JWT pra pegar userId (pode usar jwt-decode no frontend, ou passar do backend)
+    // Aqui só pega o userId do backend, que é mais seguro
+
+    try {
+      const res = await fetch(`${API_URL}/get-username`, {
         headers: {
           'Authorization': `Bearer ${auth.token}`
         }
-      })
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById('username').textContent = data.username || 'Visitante';
-        document.getElementById('status').innerHTML = renderStatus(data.status);
-      })
-      .catch(err => {
-        console.error('Erro ao buscar usuário:', err);
-        document.getElementById('username').textContent = 'Erro';
-        document.getElementById('status').textContent = 'Erro ao carregar status';
       });
-    });
-  </script>
-</body>
-</html>
+      const data = await res.json();
+
+      userId = data.userId || null; // Se precisar, ajuste no backend pra mandar userId também
+      document.getElementById('username').textContent = data.username || 'Visitante';
+      document.getElementById('status').innerHTML = renderStatus(data.status);
+
+      // Agora conecta no WS pra receber updates
+      connectWebSocket();
+    } catch (e) {
+      console.error('Erro ao buscar username/status:', e);
+      document.getElementById('username').textContent = 'Erro';
+      document.getElementById('status').textContent = 'Erro ao carregar status';
+    }
+  });
+</script>

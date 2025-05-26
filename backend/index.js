@@ -85,6 +85,7 @@ app.get('/get-username', async (req, res) => {
 
     const playerData = connectedPlayers.get(userId);
     res.json({
+      userId,
       username,
       status: playerData ? playerData.status : null
     });
@@ -124,6 +125,18 @@ wss.on('connection', (ws) => {
       }
 
       connectedPlayers.set(String(userId), { status });
+
+      const updateMsg = JSON.stringify({
+        action: 'status_broadcast',
+        userId,
+        status
+      });
+
+      wss.clients.forEach(client => {
+        if (client.readyState === client.OPEN) {
+          client.send(updateMsg);
+        }
+      });
     }
   });
 });
