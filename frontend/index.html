@@ -23,6 +23,27 @@
       font-size: 0.6em;
       margin-top: 0.5em;
     }
+    #log {
+      position: absolute;
+      bottom: 10px;
+      width: 90%;
+      max-height: 40%;
+      overflow-y: auto;
+      font-size: 0.4em;
+      text-align: left;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 0.5em;
+      border-radius: 10px;
+    }
+    .log-entry {
+      margin-bottom: 0.25em;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 0.25em;
+    }
+    .log-time {
+      color: #ccc;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -30,6 +51,8 @@
     <div>Olá, <span id="username">Carregando...</span>!</div>
     <div id="status" class="stat"></div>
   </div>
+
+  <div id="log"></div> <!-- NOVO ELEMENTO PARA LOG -->
 
   <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
   <script>
@@ -50,37 +73,58 @@
     `;
   }
 
+  function logMessageToOverlay(message) {
+    const logEl = document.getElementById('log');
+    const now = new Date();
+    const time = now.toLocaleTimeString('pt-BR');
+
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.innerHTML = `<span class="log-time">[${time}]</span> ${message}`;
+
+    logEl.appendChild(entry);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
   function connectWebSocket() {
-    ws = new WebSocket('wss://chat-survivors-overlay-server.onrender.com'); // troque para seu WS URL real
+    ws = new WebSocket('wss://chat-survivors-overlay-server.onrender.com');
 
     ws.onopen = () => {
-      console.log('WS conectado, enviando userId:', userId);
-      // Opcional: pode enviar algo para avisar quem é
-      // Se seu backend quiser receber algo do client, adapte aqui
+      const msg = 'WS conectado.';
+      console.log(msg);
+      logMessageToOverlay(msg);
     };
 
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.action === 'status_broadcast' && data.name === username) {
-        console.log('Status atualizado recebido via WS:', data.status);
-        document.getElementById('status').innerHTML = renderStatus(data.status);
+      try {
+        const data = JSON.parse(event.data);
+        logMessageToOverlay(`Recebido: ${event.data}`);
+
+        if (data.action === 'status_broadcast' && data.name === username) {
+          console.log('Status atualizado recebido via WS:', data.status);
+          document.getElementById('status').innerHTML = renderStatus(data.status);
+        }
+      } catch (e) {
+        logMessageToOverlay('Erro ao processar mensagem WS.');
+        console.error('Erro ao processar WS message:', e);
       }
     };
 
     ws.onerror = (err) => {
-      console.error('WS erro:', err);
+      const msg = 'Erro no WebSocket.';
+      console.error(msg, err);
+      logMessageToOverlay(msg);
     };
 
     ws.onclose = () => {
-      console.log('WS fechado. Tentando reconectar em 3s...');
+      const msg = 'WS desconectado. Tentando reconectar em 3s...';
+      console.log(msg);
+      logMessageToOverlay(msg);
       setTimeout(connectWebSocket, 3000);
     };
   }
 
   window.Twitch.ext.onAuthorized(async (auth) => {
-    // Decodifica o JWT pra pegar userId (pode usar jwt-decode no frontend, ou passar do backend)
-    // Aqui só pega o userId do backend, que é mais seguro
-
     try {
       const res = await fetch(`${API_URL}/get-username`, {
         headers: {
@@ -89,17 +133,18 @@
       });
       const data = await res.json();
 
-      userId = data.userId || null; // Se precisar, ajuste no backend pra mandar userId também
-      document.getElementById('username').textContent = data.username || 'Visitante';
+      userId = data.userId || null;
       username = data.username || 'Visitante';
+      document.getElementById('username').textContent = username;
       document.getElementById('status').innerHTML = renderStatus(data.status);
 
-      // Agora conecta no WS pra receber updates
+      logMessageToOverlay(`Usuário autenticado como ${username}`);
       connectWebSocket();
     } catch (e) {
       console.error('Erro ao buscar username/status:', e);
       document.getElementById('username').textContent = 'Erro';
       document.getElementById('status').textContent = 'Erro ao carregar status';
+      logMessageToOverlay('Erro ao buscar dados do usuário.');
     }
   });
 </script>
