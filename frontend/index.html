@@ -92,20 +92,20 @@
     ws.onopen = () => {
       const msg = 'WS conectado.';
       console.log(msg);
-      logMessageToOverlay(msg);
+      // logMessageToOverlay(msg);
     };
 
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        logMessageToOverlay(`Recebido: ${event.data}`);
+        // logMessageToOverlay(`Recebido: ${event.data}`);
 
-        if (data.action === 'status_broadcast' && data.name === username) {
+        if (data.action === 'status_broadcast' && data.name.toLowerCase() === username.toLowerCase()) {
           console.log('Status atualizado recebido via WS:', data.status);
           document.getElementById('status').innerHTML = renderStatus(data.status);
         }
       } catch (e) {
-        logMessageToOverlay('Erro ao processar mensagem WS.');
+        // logMessageToOverlay('Erro ao processar mensagem WS.');
         console.error('Erro ao processar WS message:', e);
       }
     };
@@ -113,13 +113,13 @@
     ws.onerror = (err) => {
       const msg = 'Erro no WebSocket.';
       console.error(msg, err);
-      logMessageToOverlay(msg);
+      // logMessageToOverlay(msg);
     };
 
     ws.onclose = () => {
       const msg = 'WS desconectado. Tentando reconectar em 3s...';
       console.log(msg);
-      logMessageToOverlay(msg);
+      // logMessageToOverlay(msg);
       setTimeout(connectWebSocket, 3000);
     };
   }
@@ -138,13 +138,13 @@
       document.getElementById('username').textContent = username;
       document.getElementById('status').innerHTML = renderStatus(data.status);
 
-      logMessageToOverlay(`Usuário autenticado como ${username}`);
+      // logMessageToOverlay(`Usuário autenticado como ${username}`);
       connectWebSocket();
     } catch (e) {
       console.error('Erro ao buscar username/status:', e);
       document.getElementById('username').textContent = 'Erro';
       document.getElementById('status').textContent = 'Erro ao carregar status';
-      logMessageToOverlay('Erro ao buscar dados do usuário.');
+      // logMessageToOverlay('Erro ao buscar dados do usuário.');
     }
   });
 </script>
