@@ -35,6 +35,7 @@
   <script>
   const API_URL = 'https://chat-survivors-overlay-server.onrender.com';
   let userId = null;
+  let username = null;
   let ws;
 
   function renderStatus(status) {
@@ -60,7 +61,7 @@
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      if (data.action === 'status_broadcast' && data.userId === userId) {
+      if (data.action === 'status_broadcast' && data.name === username) {
         console.log('Status atualizado recebido via WS:', data.status);
         document.getElementById('status').innerHTML = renderStatus(data.status);
       }
@@ -90,6 +91,7 @@
 
       userId = data.userId || null; // Se precisar, ajuste no backend pra mandar userId também
       document.getElementById('username').textContent = data.username || 'Visitante';
+      username = data.username || 'Visitante';
       document.getElementById('status').innerHTML = renderStatus(data.status);
 
       // Agora conecta no WS pra receber updates
