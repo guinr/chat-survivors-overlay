@@ -7,6 +7,9 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
+app.get('/', (_, res) => {
+  res.send("API rodando");
+});
 
 app.get('/get-username', async (req, res) => {
   const userId = req.query.user_id;
