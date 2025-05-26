@@ -1,6 +1,7 @@
 {
   "name": "twitch-overlay-backend",
   "version": "1.0.0",
+  "license": "MIT",
   "description": "Backend simples para overlay da Twitch",
   "main": "index.js",
   "scripts": {
