@@ -3,9 +3,14 @@ const express = require('express');
 const fetch = require('node-fetch');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const { WebSocketServer } = require('ws');
+const http = require('http');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
 
 app.use(cors());
 
@@ -78,6 +83,43 @@ app.get('/get-username', async (req, res) => {
     console.error('Erro ao buscar usuário na Twitch:', err);
     res.status(500).json({ error: 'Erro ao buscar usuário na Twitch' });
   }
+});
+
+const connectedPlayers = new Map();
+
+wss.on('connection', (ws) => {
+  console.log('🧩 Novo cliente WebSocket conectado');
+
+  ws.on('message', (data) => {
+    console.log('Mensagem recebida do cliente WebSocket:', data);
+    let msg;
+    try {
+      msg = JSON.parse(data);
+    } catch (e) {
+      console.log('❌ Mensagem inválida recebida');
+      return;
+    }
+
+    console.log('Mensagem válida recebida:', msg);
+
+    if (msg.action === "status_update") {
+      const { userId, status } = msg;
+      console.log(`Atualizando status do usuário ${userId} para: ${status}`);
+
+      if (!userId || !status) {
+        console.log('❌ userId ou status ausente na mensagem');
+        return;
+      }
+
+      if (!connectedPlayers.has(userId)) {
+        console.log(`🆕 Adicionando novo usuário: ${userId}`);
+      } else {
+        console.log(`🔄 Atualizando status do usuário: ${userId}`);
+      }
+
+      connectedPlayers.set(userId, { status });
+    }
+  });
 });
 
 app.listen(PORT, () => {
