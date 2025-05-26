@@ -47,7 +47,7 @@ app.get('/get-username', async (req, res) => {
     return res.status(400).json({ error: 'Erro ao decodificar token', details: e.message });
   }
 
-  const userId = payload.user_id;
+  const userId = String(payload.user_id);
   console.log('User ID extraído:', userId);
 
   try {
@@ -125,7 +125,7 @@ wss.on('connection', (ws) => {
         console.log(`🔄 Atualizando status do usuário: ${userId}`);
       }
 
-      connectedPlayers.set(userId, { status });
+      connectedPlayers.set(String(userId), { status });
     }
   });
 });
