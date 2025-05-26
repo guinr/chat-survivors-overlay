@@ -83,9 +83,10 @@ app.get('/get-username', async (req, res) => {
     const username = userData.data?.[0]?.display_name || 'Unknown';
     console.log('Username extraído:', username);
 
-    res.json({ 
-      username, 
-      status: connectedPlayers.get(userId) || null
+    const playerData = connectedPlayers.get(userId);
+    res.json({
+      username,
+      status: playerData ? playerData.status : null
     });
   } catch (err) {
     console.error('Erro ao buscar usuário na Twitch:', err);
@@ -99,7 +100,6 @@ wss.on('connection', (ws) => {
   console.log('🧩 Novo cliente WebSocket conectado');
 
   ws.on('message', (data) => {
-    console.log('Mensagem recebida do cliente WebSocket:', data);
     let msg;
     try {
       msg = JSON.parse(data);
@@ -107,8 +107,6 @@ wss.on('connection', (ws) => {
       console.log('❌ Mensagem inválida recebida');
       return;
     }
-
-    console.log('Mensagem válida recebida:', msg);
 
     if (msg.action === "status_update") {
       const { userId, status } = msg;
