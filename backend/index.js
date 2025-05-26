@@ -118,12 +118,6 @@ wss.on('connection', (ws) => {
         return;
       }
 
-      if (!connectedPlayers.has(userId)) {
-        console.log(`🆕 Adicionando novo usuário: ${userId}`);
-      } else {
-        console.log(`🔄 Atualizando status do usuário: ${userId}`);
-      }
-
       connectedPlayers.set(String(userId), { status });
 
       const updateMsg = JSON.stringify({

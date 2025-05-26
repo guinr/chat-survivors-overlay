@@ -1,4 +1,38 @@
-<script>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Overlay Twitch</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      color: white;
+      font-family: sans-serif;
+      font-size: 2em;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .stat {
+      font-size: 0.6em;
+      margin-top: 0.5em;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div>Olá, <span id="username">Carregando...</span>!</div>
+    <div id="status" class="stat"></div>
+  </div>
+
+  <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
+  <script>
   const API_URL = 'https://chat-survivors-overlay-server.onrender.com';
   let userId = null;
   let ws;
@@ -67,3 +101,5 @@
     }
   });
 </script>
+</body>
+</html>
