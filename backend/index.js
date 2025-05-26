@@ -9,61 +9,35 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
-const client = jwksClient({
-  jwksUri: 'https://id.twitch.tv/oauth2/keys'
-});
-
-async function getSigningKey(kid) {
-  return new Promise((resolve, reject) => {
-    client.getSigningKey(kid, (err, key) => {
-      if (err) {
-        console.error('Erro ao buscar chave:', err);
-        return reject(err);
-      }
-      const signingKey = key.getPublicKey();
-      console.log('Chave pública obtida para kid:', kid);
-      resolve(signingKey);
-    });
-  });
-}
-
 app.get('/get-username', async (req, res) => {
-  const authHeader = req.headers.authorization;
+  const userId = req.query.user_id;
+  if (!userId) return res.status(400).json({ error: 'Missing user_id' });
 
-  if (!authHeader) {
-    console.warn('Faltando header Authorization');
-    return res.status(401).json({ error: 'Missing Authorization header' });
+  const tokenRes = await fetch(`https://id.twitch.tv/oauth2/token`, {
+    method: 'POST',
+    body: new URLSearchParams({
+      client_id: process.env.TWITCH_CLIENT_ID,
+      client_secret: process.env.TWITCH_CLIENT_SECRET,
+      grant_type: 'client_credentials'
+    })
+  });
+  const tokenData = await tokenRes.json();
+
+  if (!tokenData.access_token) {
+    return res.status(500).json({ error: 'Falha ao obter token de acesso' });
   }
 
-  const token = authHeader.split(' ')[1];
-  console.log('Token recebido:', token);
-
-  try {
-    const decodedHeader = jwt.decode(token, { complete: true });
-    console.log('Decoded header:', decodedHeader);
-
-    if (!decodedHeader) {
-      throw new Error('Token inválido ou malformado');
+  const userRes = await fetch(`https://api.twitch.tv/helix/users?id=${userId}`, {
+    headers: {
+      'Client-ID': process.env.TWITCH_CLIENT_ID,
+      'Authorization': `Bearer ${tokenData.access_token}`
     }
+  });
 
-    const kid = decodedHeader.header.kid;
-    const alg = decodedHeader.header.alg;
-    console.log('kid:', kid, 'alg:', alg);
+  const userData = await userRes.json();
+  const username = userData.data?.[0]?.display_name || 'Unknown';
 
-    const signingKey = await getSigningKey(kid);
-
-    console.log('Tentando verificar token com algoritmo RS256...');
-    const decoded = jwt.verify(token, signingKey, { algorithms: ['RS256'] });
-
-    console.log('Token verificado com sucesso:', decoded);
-
-    const username = `Usuário ${decoded.user_id}`;
-    res.json({ username });
-
-  } catch (err) {
-    console.error('Erro ao verificar token:', err);
-    res.status(401).json({ error: 'Invalid token' });
-  }
+  res.json({ username });
 });
 
 app.listen(PORT, () => {
