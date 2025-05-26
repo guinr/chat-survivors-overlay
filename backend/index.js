@@ -1,7 +1,8 @@
 require('dotenv').config();
 const express = require('express');
+const fetch = require('node-fetch');
 const cors = require('cors');
-const fetch = require('node-fetch'); // não esqueça de importar!
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,13 +12,33 @@ app.use(cors());
 app.get('/get-username', async (req, res) => {
   console.log('Requisição recebida em /get-username');
 
-  const userId = req.query.user_id;
-  console.log('Parâmetro user_id:', userId);
+  const authHeader = req.headers['authorization'];
+  console.log('Authorization header:', authHeader);
 
-  if (!userId) {
-    console.warn('user_id ausente na requisição');
-    return res.status(400).json({ error: 'Missing user_id' });
+  if (!authHeader) {
+    console.log('Token JWT não enviado');
+    return res.status(401).json({ error: 'Token JWT não enviado' });
   }
+
+  const token = authHeader.split(' ')[1];
+  console.log('Token JWT extraído:', token);
+
+  let payload;
+  try {
+    payload = jwt.decode(token);
+    console.log('Payload decodificado:', payload);
+
+    if (!payload || !payload.user_id) {
+      console.log('Token inválido ou sem user_id');
+      return res.status(400).json({ error: 'Token inválido ou sem user_id' });
+    }
+  } catch (e) {
+    console.log('Erro ao decodificar token:', e.message);
+    return res.status(400).json({ error: 'Erro ao decodificar token', details: e.message });
+  }
+
+  const userId = payload.user_id;
+  console.log('User ID extraído:', userId);
 
   try {
     console.log('Solicitando token de acesso à Twitch...');
@@ -30,45 +51,32 @@ app.get('/get-username', async (req, res) => {
       })
     });
 
-    if (!tokenRes.ok) {
-      const errorBody = await tokenRes.text();
-      console.error('Erro ao obter token:', tokenRes.status, errorBody);
-      return res.status(500).json({ error: 'Falha ao obter token de acesso' });
-    }
-
     const tokenData = await tokenRes.json();
-    console.log('Token recebido:', tokenData);
+    console.log('Resposta do token de acesso:', tokenData);
 
-    const accessToken = tokenData.access_token;
-    if (!accessToken) {
-      console.error('Token de acesso não encontrado na resposta');
+    if (!tokenData.access_token) {
+      console.log('Falha ao obter token de acesso');
       return res.status(500).json({ error: 'Falha ao obter token de acesso' });
     }
 
-    console.log(`Buscando dados do usuário ${userId} na API Twitch...`);
+    console.log(`Buscando dados do usuário ${userId} na Twitch...`);
     const userRes = await fetch(`https://api.twitch.tv/helix/users?id=${userId}`, {
       headers: {
         'Client-ID': process.env.TWITCH_CLIENT_ID,
-        'Authorization': `Bearer ${accessToken}`
+        'Authorization': `Bearer ${tokenData.access_token}`
       }
     });
 
-    if (!userRes.ok) {
-      const errorBody = await userRes.text();
-      console.error('Erro ao buscar usuário:', userRes.status, errorBody);
-      return res.status(500).json({ error: 'Falha ao buscar dados do usuário' });
-    }
-
     const userData = await userRes.json();
-    console.log('Dados do usuário:', userData);
+    console.log('Dados do usuário recebidos:', userData);
 
     const username = userData.data?.[0]?.display_name || 'Unknown';
-    console.log('Nome de usuário retornado:', username);
+    console.log('Username extraído:', username);
 
     res.json({ username });
-  } catch (error) {
-    console.error('Erro inesperado:', error);
-    res.status(500).json({ error: 'Erro interno no servidor' });
+  } catch (err) {
+    console.error('Erro ao buscar usuário na Twitch:', err);
+    res.status(500).json({ error: 'Erro ao buscar usuário na Twitch' });
   }
 });
 
