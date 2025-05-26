@@ -14,6 +14,11 @@ const wss = new WebSocketServer({ server });
 
 app.use(cors());
 
+app.get('/players', (_, res) => {
+  const allPlayers = Object.fromEntries(connectedPlayers.entries());
+  res.json(allPlayers);
+});
+
 app.get('/get-username', async (req, res) => {
   console.log('Requisição recebida em /get-username');
 
