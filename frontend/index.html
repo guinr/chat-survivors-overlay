@@ -30,15 +30,19 @@
     window.Twitch.ext.onAuthorized(auth => {
       const userId = auth.userId;
 
-      fetch(`${API_URL}/get-username?user_id=${userId}`)
-        .then(res => res.json())
-        .then(data => {
-          document.getElementById('username').textContent = data.username || 'Visitante';
-        })
-        .catch(err => {
-          console.error('Erro ao buscar usuário:', err);
-          document.getElementById('username').textContent = 'Erro';
-        });
+      fetch(`${API_URL}/get-username`, {
+        headers: {
+          'Authorization': `Bearer ${auth.token}`
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('username').textContent = data.username || 'Visitante';
+      })
+      .catch(err => {
+        console.error('Erro ao buscar usuário:', err);
+        document.getElementById('username').textContent = 'Erro';
+      });
     });
   </script>
 </body>
