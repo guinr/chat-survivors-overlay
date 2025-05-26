@@ -16,8 +16,12 @@ const client = jwksClient({
 async function getSigningKey(kid) {
   return new Promise((resolve, reject) => {
     client.getSigningKey(kid, (err, key) => {
-      if (err) return reject(err);
+      if (err) {
+        console.error('Erro ao buscar chave:', err);
+        return reject(err);
+      }
       const signingKey = key.getPublicKey();
+      console.log('Chave pública obtida para kid:', kid);
       resolve(signingKey);
     });
   });
@@ -26,20 +30,32 @@ async function getSigningKey(kid) {
 app.get('/get-username', async (req, res) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader) return res.status(401).json({ error: 'Missing Authorization header' });
+  if (!authHeader) {
+    console.warn('Faltando header Authorization');
+    return res.status(401).json({ error: 'Missing Authorization header' });
+  }
 
-  const token = authHeader.split(' ')[1]; // Bearer <token>
+  const token = authHeader.split(' ')[1];
+  console.log('Token recebido:', token);
 
   try {
-    // Decode header to get 'kid' (key id)
     const decodedHeader = jwt.decode(token, { complete: true });
-    if (!decodedHeader) throw new Error('Invalid token');
+    console.log('Decoded header:', decodedHeader);
 
-    // Pega a chave pública correspondente ao 'kid'
-    const signingKey = await getSigningKey(decodedHeader.header.kid);
+    if (!decodedHeader) {
+      throw new Error('Token inválido ou malformado');
+    }
 
-    // Verifica o token com a chave pública
+    const kid = decodedHeader.header.kid;
+    const alg = decodedHeader.header.alg;
+    console.log('kid:', kid, 'alg:', alg);
+
+    const signingKey = await getSigningKey(kid);
+
+    console.log('Tentando verificar token com algoritmo RS256...');
     const decoded = jwt.verify(token, signingKey, { algorithms: ['RS256'] });
+
+    console.log('Token verificado com sucesso:', decoded);
 
     const username = `Usuário ${decoded.user_id}`;
     res.json({ username });
