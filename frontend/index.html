@@ -253,6 +253,21 @@
           }
         },
         updateStatus(status) {
+          if (Object.keys(status).length === 0 && status.constructor === Object) {
+            this.level = 0;
+            this.hp = { actual: 0, max: 0 };
+            this.attributePoints = 0;
+            this.attributes = {
+              strength: 0,
+              agility: 0,
+              vitality: 0,
+              luck: 0
+            };
+            this.playerColor = '';
+            this.log('Status vazio recebido. Interface reiniciada.');
+            return;
+          }
+
           this.level = status.level;
           this.hp = {
             actual: status.actual_health,
