@@ -240,6 +240,7 @@
               headers: { Authorization: `Bearer ${authToken}` }
             });
             const data = await res.json();
+            console.log('Resposta do backend:', data);
             this.username = data.username;
             this.updateStatus(data.status);
           } catch (e) {
