@@ -100,7 +100,7 @@
         const data = JSON.parse(event.data);
         // logMessageToOverlay(`Recebido: ${event.data}`);
 
-        if (data.action === 'status_broadcast' && data.name.toLowerCase() === username.toLowerCase()) {
+        if (data.action === 'status_broadcast' && data.status.name.toLowerCase() === username.toLowerCase()) {
           console.log('Status atualizado recebido via WS:', data.status);
           document.getElementById('status').innerHTML = renderStatus(data.status);
         }
