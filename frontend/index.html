@@ -134,7 +134,7 @@
         <div class="login" v-else>
           <button
             class="attr-btn"
-            @click="connectWebSocket">
+            @click="join">
             Entrar
           </button>
         </div>
@@ -228,15 +228,11 @@
           };
         },
         join() {
-          if (this.isWebSocketOpen) {
-            this.ws.send(JSON.stringify({
-              name: this.username,
-              action: 'join'
-            }));
-            this.log(`Enviado: join (${this.username})`);
-          } else {
-            this.log('WebSocket não está conectado.');
-          }
+          this.ws.send(JSON.stringify({
+            name: this.username,
+            action: 'join'
+          }));
+          this.log(`Enviado: join (${this.username})`);
         },
         async fetchUserInfo(authToken) {
           try {
@@ -246,7 +242,6 @@
             const data = await res.json();
             this.username = data.username;
             this.updateStatus(data.status);
-            this.connectWebSocket();
           } catch (e) {
             this.username = 'Erro';
             this.log('Erro ao buscar usuário.');
@@ -267,7 +262,6 @@
           };
         },
         upgradeAttribute(attr) {
-          console.log(`Atributo a ser melhorado: ${attr}`);
           if (this.attributePoints > 0) {
             const attrMap = {
               strength: "for",
@@ -295,6 +289,7 @@
         },
       },
       mounted() {
+        this.connectWebSocket();
         window.Twitch.ext.onAuthorized(auth => {
           this.fetchUserInfo(auth.token);
         });

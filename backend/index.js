@@ -155,19 +155,19 @@ wss.on('connection', (ws) => {
     }
 
     if (msg.action === "status_update") {
-      const { userId, status } = msg;
-      console.log(`Atualizando status do usuário ${userId} para: ${status}`);
+      const { name, status } = msg;
+      console.log(`Atualizando status do usuário ${name} para: ${status}`);
 
-      if (!userId || !status) {
-        console.log('❌ userId ou status ausente na mensagem');
+      if (!name || !status) {
+        console.log('❌ name ou status ausente na mensagem');
         return;
       }
 
-      connectedPlayers.set(String(userId), { status });
+      connectedPlayers.set(String(name), { status });
 
       const updateMsg = JSON.stringify({
         action: 'status_broadcast',
-        userId,
+        name,
         status
       });
 
