@@ -109,6 +109,31 @@ wss.on('connection', (ws) => {
       return;
     }
 
+    if (["for", "agi", "vit", "sor"].includes(msg.action)) {
+      const { name, action, value } = msg;
+      console.log(`Atualizando status do usuário ${name} para: ${value}`);
+
+      if (!name || !value) {
+        console.log('❌ name ou value ausente na mensagem');
+        return;
+      }
+
+      connectedPlayers.set(String(name), { status: value });
+
+      const updateMsg = JSON.stringify({
+        name,
+        action,
+        value
+      });
+
+      wss.clients.forEach(client => {
+        if (client.readyState === client.OPEN) {
+          client.send(updateMsg);
+        }
+      });
+      return;
+    }
+
     if (msg.action === "status_update") {
       const { userId, status } = msg;
       console.log(`Atualizando status do usuário ${userId} para: ${status}`);

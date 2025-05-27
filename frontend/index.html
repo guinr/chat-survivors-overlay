@@ -126,7 +126,6 @@
             <span>{{ value }}</span>
             <button
               v-if="attributePoints > 0"
-              :disabled="isWebSocketOpen"
               class="attr-btn"
               @click="upgradeAttribute(key)"
             >+</button>
@@ -135,8 +134,7 @@
         <div class="login" v-else>
           <button
             class="attr-btn"
-            @click="connectWebSocket"
-            :disabled="isWebSocketOpen">
+            @click="connectWebSocket">
             Entrar
           </button>
         </div>
@@ -269,7 +267,8 @@
           };
         },
         upgradeAttribute(attr) {
-          if (this.isWebSocketOpen && this.attributePoints > 0) {
+          console.log(`Atributo a ser melhorado: ${attr}`);
+          if (this.attributePoints > 0) {
             const attrMap = {
               strength: "for",
               agility: "agi",
