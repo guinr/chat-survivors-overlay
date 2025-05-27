@@ -136,7 +136,7 @@
             v-if="username !== ''"
             class="attr-btn"
             @click="join">
-            Entrar
+            Entrar no jogo
           </button>
         </div>
       </section>
@@ -156,7 +156,7 @@
     createApp({
       data() {
         return {
-          username: 'ChatSurvivors',
+          username: '',
           playerColor: '',
           level: 0,
           hp: { actual: 0, max: 0 },
