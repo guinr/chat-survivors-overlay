@@ -230,10 +230,10 @@
           };
         },
         join() {
-          if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+          if (this.isWebSocketOpen) {
             this.ws.send(JSON.stringify({
-              action: 'join',
-              username: this.username
+              name: this.username,
+              action: 'join'
             }));
             this.log(`Enviado: join (${this.username})`);
           } else {
@@ -269,14 +269,31 @@
           };
         },
         upgradeAttribute(attr) {
-          if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify({
-              action: 'upgrade_attribute',
-              username: this.username,
-              attribute: attr
-            }));
+          if (this.isWebSocketOpen && this.attributePoints > 0) {
+            const attrMap = {
+              strength: "for",
+              agility: "agi",
+              vitality: "vit",
+              luck: "sor"
+            };
+
+            const actionCode = attrMap[attr];
+
+            if (!actionCode) {
+              this.log(`Atributo desconhecido: ${attr}`);
+              return;
+            }
+
+            const command = {
+              name: this.username,
+              action: actionCode,
+              value: 1
+            };
+
+            this.ws.send(JSON.stringify(command));
+            this.log(`Enviado: ${JSON.stringify(command)}`);
           }
-        }
+        },
       },
       mounted() {
         window.Twitch.ext.onAuthorized(auth => {
