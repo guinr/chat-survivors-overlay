@@ -116,7 +116,7 @@
     <main>
       <section>
         <div :style="{ color: nameColorStyle }" class="name-label">{{ username }}</div>
-        <div v-if="level">
+        <div v-if="username !== ''">
           <div>Nível: {{ level }}</div>
           <div>HP: {{ hp.actual }} / {{ hp.max }}</div>
           <div>Pontos disponíveis: {{ attributePoints }}</div>
