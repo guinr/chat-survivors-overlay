@@ -242,7 +242,10 @@
             const data = await res.json();
             console.log('Resposta do backend:', data);
             this.username = data.username;
-            this.updateStatus(data.status);
+            if (data.status) {
+              this.updateStatus(data.status);
+              this.playerColor = data.status.color;
+            }
           } catch (e) {
             this.username = 'Erro';
             this.log('Erro ao buscar usuário.');
