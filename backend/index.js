@@ -109,6 +109,26 @@ wss.on('connection', (ws) => {
       return;
     }
 
+    if (msg.action === "join") {
+      const { name, action } = msg;
+      console.log(`Usuário ${name} se juntou com ação: ${action}`);
+      if (!name || !action) {
+        console.log('❌ name ou action ausente na mensagem');
+        return;
+      }
+
+      const joinMsg = JSON.stringify({
+        name,
+        action
+      });
+
+      wss.clients.forEach(client => {
+        if (client.readyState === client.OPEN) {
+          client.send(joinMsg);
+        }
+      });
+    }
+
     if (["for", "agi", "vit", "sor"].includes(msg.action)) {
       const { name, action, value } = msg;
       console.log(`Atualizando status do usuário ${name} para: ${value}`);
