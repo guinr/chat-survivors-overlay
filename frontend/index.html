@@ -156,7 +156,7 @@
     createApp({
       data() {
         return {
-          username: '',
+          username: 'ChatSurvivors',
           playerColor: '',
           level: 0,
           hp: { actual: 0, max: 0 },
@@ -241,7 +241,6 @@
               headers: { Authorization: `Bearer ${authToken}` }
             });
             const data = await res.json();
-            console.log('Resposta do backend:', data);
             this.username = data.username;
             if (data.status) {
               this.updateStatus(data.status);
@@ -253,7 +252,9 @@
           }
         },
         updateStatus(status) {
-          if (Object.keys(status).length === 0) {
+          if (status.actual_health === 0) {
+            status.color = '(255, 255, 255, 1)';
+            this.playerColor = null;
             this.level = 0;
             this.hp = { actual: 0, max: 0 };
             this.attributePoints = 0;
@@ -263,8 +264,6 @@
               vitality: 0,
               luck: 0
             };
-            this.playerColor = '';
-            this.log('Status vazio recebido. Interface reiniciada.');
             return;
           }
 
