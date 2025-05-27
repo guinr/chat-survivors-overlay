@@ -3,43 +3,108 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Overlay Twitch</title>
+  <title>Overlay Vue Twitch</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   <style>
-    html, body {
+    body, html, #app {
       margin: 0;
       padding: 0;
       background: transparent;
       color: white;
       font-family: sans-serif;
-      font-size: 2em;
-      text-align: center;
       display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
       height: 100vh;
+      width: 100vw;
     }
+
+    #app {
+      display: grid;
+      grid-template-rows: 1fr 48px;
+      gap: 1rem;
+    }
+
+    main {
+      border-radius: 3px;
+      height: 100%;
+      width: 100vw;
+    }
+
+    section {
+      font-size: 1.2em;
+      width: calc(12vw - 1em);
+      padding: 0.5em;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 0 3px 3px 0;
+    }
+
+    .name-label {
+      font-size: 1.4em;
+      text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px  1px 0 #000,
+        1px  1px 0 #000;
+    }
+
     .stat {
-      font-size: 0.6em;
-      margin-top: 0.5em;
+      font-size: 0.8em;
+      margin: 0.3em 0;
+      display: grid;
+      grid-template-columns: 45% 15% 1fr;
     }
+
+    .stat-name {
+      text-align: right;
+      padding-right: 0.5em;
+    }
+
+    .login {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+      padding: 1em 0;
+    }
+
+    .attr-btn {
+      padding: 0.5em;
+      font-size: 0.7em;
+      cursor: pointer;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: none;
+      border-radius: 3px;
+      color: white;
+    }
+
+    .attr-btn:disabled {
+      background-color: rgba(255, 255, 255, 0.05);
+      cursor: not-allowed;
+    }
+
+    .attr-btn:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
     #log {
-      position: absolute;
-      bottom: 10px;
-      width: 90%;
-      max-height: 40%;
+      height: 48px;
+      width: 100vw;
       overflow-y: auto;
-      font-size: 0.4em;
+      font-size: 0.6em;
       text-align: left;
       background: rgba(0, 0, 0, 0.4);
-      padding: 0.5em;
-      border-radius: 10px;
+      border-radius: 3px 3px 0 0;
     }
+
     .log-entry {
       margin-bottom: 0.25em;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       padding-bottom: 0.25em;
     }
+
     .log-time {
       color: #ccc;
       font-weight: bold;
@@ -47,106 +112,178 @@
   </style>
 </head>
 <body>
-  <div>
-    <div>Olá, <span id="username">Carregando...</span>!</div>
-    <div id="status" class="stat"></div>
-  </div>
+  <div id="app">
+    <main>
+      <section>
+        <div :style="{ color: nameColorStyle }" class="name-label">{{ username }}</div>
+        <div v-if="level">
+          <div>Nível: {{ level }}</div>
+          <div>HP: {{ hp.actual }} / {{ hp.max }}</div>
+          <div>Pontos disponíveis: {{ attributePoints }}</div>
 
-  <div id="log"></div> <!-- NOVO ELEMENTO PARA LOG -->
+          <div class="stat" v-for="(value, key) in attributes" :key="key">
+            <span class="stat-name">{{ key.toUpperCase() }}:</span>
+            <span>{{ value }}</span>
+            <button
+              v-if="attributePoints > 0"
+              :disabled="isWebSocketOpen"
+              class="attr-btn"
+              @click="upgradeAttribute(key)"
+            >+</button>
+          </div>
+        </div>
+        <div class="login" v-else>
+          <button
+            class="attr-btn"
+            @click="connectWebSocket"
+            :disabled="isWebSocketOpen">
+            Entrar
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <footer id="log" v-if="logs.length > 0">
+      <div v-for="entry in logs" class="log-entry">
+        <span class="log-time">[{{ entry.time }}]</span> {{ entry.message }}
+      </div>
+    </footer>
+  </div>
 
   <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
   <script>
-  const API_URL = 'https://chat-survivors-overlay-server.onrender.com';
-  let userId = null;
-  let username = null;
-  let ws;
+    const { createApp } = Vue;
 
-  function renderStatus(status) {
-    if (!status) return 'Sem status disponível';
+    createApp({
+      data() {
+        return {
+          username: 'chatsurvivors',
+          playerColor: '',
+          level: 0,
+          hp: { actual: 0, max: 0 },
+          attributes: { strength: 0, agility: 0, vitality: 0, luck: 0 },
+          attributePoints: 0,
+          ws: null,
+          logs: [],
+          API_URL: 'https://chat-survivors-overlay-server.onrender.com'
+        };
+      },
+      computed: {
+        isWebSocketOpen() {
+          return (
+            typeof WebSocket !== 'undefined' &&
+            this.ws &&
+            this.ws.readyState === WebSocket.OPEN
+          );
+        },
+        nameColorStyle() {
+          if (!this.playerColor) return '';
+          const parts = this.playerColor
+            .replace(/[()]/g, '')
+            .split(',')
+            .map(v => parseFloat(v.trim()));
 
-    const attr = status.attributes || {};
-    return `
-      HP: ${status.actual_health} / ${status.max_health}<br/>
-      XP: ${status.experience} / ${status.experience_to_next_level}<br/>
-      Nível: ${status.level}<br/>
-      Força: ${attr.strength} | Agilidade: ${attr.agility} | Vitalidade: ${attr.vitality} | Sorte: ${attr.luck}
-    `;
-  }
+          if (parts.length !== 4) return '';
 
-  function logMessageToOverlay(message) {
-    const logEl = document.getElementById('log');
-    const now = new Date();
-    const time = now.toLocaleTimeString('pt-BR');
-
-    const entry = document.createElement('div');
-    entry.className = 'log-entry';
-    entry.innerHTML = `<span class="log-time">[${time}]</span> ${message}`;
-
-    logEl.appendChild(entry);
-    logEl.scrollTop = logEl.scrollHeight;
-  }
-
-  function connectWebSocket() {
-    ws = new WebSocket('wss://chat-survivors-overlay-server.onrender.com');
-
-    ws.onopen = () => {
-      const msg = 'WS conectado.';
-      console.log(msg);
-      // logMessageToOverlay(msg);
-    };
-
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        // logMessageToOverlay(`Recebido: ${event.data}`);
-
-        if (data.action === 'status_broadcast' && data.status.name.toLowerCase() === username.toLowerCase()) {
-          console.log('Status atualizado recebido via WS:', data.status);
-          document.getElementById('status').innerHTML = renderStatus(data.status);
+          const [r, g, b, a] = parts;
+          return `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
         }
-      } catch (e) {
-        // logMessageToOverlay('Erro ao processar mensagem WS.');
-        console.error('Erro ao processar WS message:', e);
+      },
+      watch: {
+        isWebSocketOpen(newVal) {
+          if (newVal) {
+            this.log('WebSocket está aberto.');
+          } else {
+            this.log('WebSocket não está aberto.');
+          }
+        }
+      },
+      methods: {
+        log(message) {
+          const time = new Date().toLocaleTimeString('pt-BR');
+          this.logs.push({ time, message });
+          if (this.logs.length > 100) this.logs.shift();
+        },
+        connectWebSocket() {
+          this.ws = new WebSocket('wss://chat-survivors-overlay-server.onrender.com');
+          this.ws.onopen = () => this.log('WebSocket conectado.');
+
+          this.ws.onmessage = (event) => {
+            try {
+              const data = JSON.parse(event.data);
+              if (
+                data.action === 'status_broadcast' &&
+                data.status.name.toLowerCase() === this.username.toLowerCase()
+              ) {
+                this.updateStatus(data.status);
+                this.playerColor = data.status.color;
+              }
+            } catch (e) {
+              this.log('Erro ao processar mensagem WS.');
+            }
+          };
+
+          this.ws.onerror = () => this.log('Erro no WebSocket.');
+          this.ws.onclose = () => {
+            this.log('WebSocket desconectado. Reconectando em 3s...');
+            setTimeout(this.connectWebSocket, 3000);
+          };
+        },
+        join() {
+          if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify({
+              action: 'join',
+              username: this.username
+            }));
+            this.log(`Enviado: join (${this.username})`);
+          } else {
+            this.log('WebSocket não está conectado.');
+          }
+        },
+        async fetchUserInfo(authToken) {
+          try {
+            const res = await fetch(`${this.API_URL}/get-username`, {
+              headers: { Authorization: `Bearer ${authToken}` }
+            });
+            const data = await res.json();
+            this.username = data.username;
+            this.updateStatus(data.status);
+            this.connectWebSocket();
+          } catch (e) {
+            this.username = 'Erro';
+            this.log('Erro ao buscar usuário.');
+          }
+        },
+        updateStatus(status) {
+          this.level = status.level;
+          this.hp = {
+            actual: status.actual_health,
+            max: status.max_health
+          };
+          this.attributePoints = status.available_stat_points || 0;
+          this.attributes = {
+            strength: status.attributes.strength,
+            agility: status.attributes.agility,
+            vitality: status.attributes.vitality,
+            luck: status.attributes.luck
+          };
+        },
+        upgradeAttribute(attr) {
+          if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify({
+              action: 'upgrade_attribute',
+              username: this.username,
+              attribute: attr
+            }));
+          }
+        }
+      },
+      mounted() {
+        window.Twitch.ext.onAuthorized(auth => {
+          this.fetchUserInfo(auth.token);
+        });
       }
-    };
-
-    ws.onerror = (err) => {
-      const msg = 'Erro no WebSocket.';
-      console.error(msg, err);
-      // logMessageToOverlay(msg);
-    };
-
-    ws.onclose = () => {
-      const msg = 'WS desconectado. Tentando reconectar em 3s...';
-      console.log(msg);
-      // logMessageToOverlay(msg);
-      setTimeout(connectWebSocket, 3000);
-    };
-  }
-
-  window.Twitch.ext.onAuthorized(async (auth) => {
-    try {
-      const res = await fetch(`${API_URL}/get-username`, {
-        headers: {
-          'Authorization': `Bearer ${auth.token}`
-        }
-      });
-      const data = await res.json();
-
-      userId = data.userId || null;
-      username = data.username || 'Visitante';
-      document.getElementById('username').textContent = username;
-      document.getElementById('status').innerHTML = renderStatus(data.status);
-
-      // logMessageToOverlay(`Usuário autenticado como ${username}`);
-      connectWebSocket();
-    } catch (e) {
-      console.error('Erro ao buscar username/status:', e);
-      document.getElementById('username').textContent = 'Erro';
-      document.getElementById('status').textContent = 'Erro ao carregar status';
-      // logMessageToOverlay('Erro ao buscar dados do usuário.');
-    }
-  });
-</script>
+    }).mount('#app');
+  </script>
 </body>
 </html>
