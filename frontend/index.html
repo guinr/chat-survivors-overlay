@@ -116,7 +116,7 @@
     <main>
       <section>
         <div :style="{ color: nameColorStyle }" class="name-label">{{ username }}</div>
-        <div v-if="username !== '' && level">
+        <div v-if="level">
           <div>Nível: {{ level }}</div>
           <div>HP: {{ hp.actual }} / {{ hp.max }}</div>
           <div>Pontos disponíveis: {{ attributePoints }}</div>
@@ -133,6 +133,7 @@
         </div>
         <div class="login" v-else>
           <button
+            v-if="username !== ''"
             class="attr-btn"
             @click="join">
             Entrar
