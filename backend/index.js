@@ -23,7 +23,6 @@ app.get('/get-username', async (req, res) => {
   console.log('Requisição recebida em /get-username');
 
   const authHeader = req.headers['authorization'];
-  console.log('Authorization header:', authHeader);
 
   if (!authHeader) {
     console.log('Token JWT não enviado');
@@ -31,12 +30,10 @@ app.get('/get-username', async (req, res) => {
   }
 
   const token = authHeader.split(' ')[1];
-  console.log('Token JWT extraído:', token);
 
   let payload;
   try {
     payload = jwt.decode(token);
-    console.log('Payload decodificado:', payload);
 
     if (!payload || !payload.user_id) {
       console.log('Token inválido ou sem user_id');
@@ -48,7 +45,6 @@ app.get('/get-username', async (req, res) => {
   }
 
   const userId = String(payload.user_id);
-  console.log('User ID extraído:', userId);
 
   try {
     console.log('Solicitando token de acesso à Twitch...');
@@ -62,14 +58,12 @@ app.get('/get-username', async (req, res) => {
     });
 
     const tokenData = await tokenRes.json();
-    console.log('Resposta do token de acesso:', tokenData);
 
     if (!tokenData.access_token) {
       console.log('Falha ao obter token de acesso');
       return res.status(500).json({ error: 'Falha ao obter token de acesso' });
     }
 
-    console.log(`Buscando dados do usuário ${userId} na Twitch...`);
     const userRes = await fetch(`https://api.twitch.tv/helix/users?id=${userId}`, {
       headers: {
         'Client-ID': process.env.TWITCH_CLIENT_ID,
@@ -81,7 +75,6 @@ app.get('/get-username', async (req, res) => {
     console.log('Dados do usuário recebidos:', userData);
 
     const username = userData.data?.[0]?.display_name || 'Unknown';
-    console.log('Username extraído:', username);
 
     const playerData = connectedPlayers.get(userId);
     res.json({
@@ -131,7 +124,6 @@ wss.on('connection', (ws) => {
 
     if (["for", "agi", "vit", "sor"].includes(msg.action)) {
       const { name, action, value } = msg;
-      console.log(`Atualizando status do usuário ${name} para: ${value}`);
 
       if (!name || !value) {
         console.log('❌ name ou value ausente na mensagem');
@@ -156,7 +148,6 @@ wss.on('connection', (ws) => {
 
     if (msg.action === "status_update") {
       const { name, status } = msg;
-      console.log(`Atualizando status do usuário ${name} para: ${status}`);
 
       if (!name || !status) {
         console.log('❌ name ou status ausente na mensagem');
