@@ -182,7 +182,7 @@
       <div></div>
       <section class="right-section">
         <div>Autorize o uso do seu nome para jogar.</div>
-        <button @click="window.Twitch.ext.actions.requestIdShare()">
+        <button @click="requestAuthorization" v-if="needsPermission">
           Autorizar
         </button>
       </section>
@@ -348,6 +348,11 @@
             this.log(`Enviado: ${JSON.stringify(command)}`);
           }
         },
+        requestAuthorization() {
+          window.Twitch.ext.actions.requestIdShare();
+          this.needsPermission = false;
+          this.log('Solicitação de autorização enviada.');
+        }
       },
       mounted() {
         this.connectWebSocket();
