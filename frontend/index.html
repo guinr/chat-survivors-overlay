@@ -132,7 +132,6 @@
     .right-section {
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
     }
 
@@ -141,6 +140,12 @@
       max-width: 200px;
       padding: 1em;
       margin-top: 1em;
+    }
+
+    .needs-permission-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
   </style>
 </head>
@@ -177,7 +182,7 @@
       </section>
       <div></div>
       <section class="right-section">
-        <div v-if="needsPermission">
+        <div class="needs-permission-section" v-if="needsPermission">
           <div>Autorize o uso do seu nome para jogar.</div>
           <button @click="requestAuthorization">
             Autorizar
