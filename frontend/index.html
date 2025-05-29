@@ -18,8 +18,6 @@
       flex-direction: column;
       height: 100vh;
       width: 100vw;
-      max-height: 1080px;
-      max-width: 1920px;
       text-shadow:
         -1px -1px 0 #000,
         1px -1px 0 #000,
@@ -150,29 +148,31 @@
   <div id="app">
     <main>
       <section>
-        <div :style="{ color: nameColorStyle }" class="name-label">{{ username }}</div>
-        <div v-if="level">
-          <div>Nível: {{ level }}</div>
-          <div>HP: {{ hp.actual }} / {{ hp.max }}</div>
-          <div>Pontos disponíveis: {{ attributePoints }}</div>
+        <div v-if="needsPermission">
+          <div :style="{ color: nameColorStyle }" class="name-label">{{ username }}</div>
+          <div v-if="level">
+            <div>Nível: {{ level }}</div>
+            <div>HP: {{ hp.actual }} / {{ hp.max }}</div>
+            <div>Pontos disponíveis: {{ attributePoints }}</div>
 
-          <div class="stat" v-for="(value, key) in attributes" :key="key">
-            <span class="stat-name">{{ key.toUpperCase() }}:</span>
-            <span>{{ value }}</span>
-            <button
-              v-if="attributePoints > 0"
-              class="attr-btn"
-              @click="upgradeAttribute(key)"
-            >+</button>
+            <div class="stat" v-for="(value, key) in attributes" :key="key">
+              <span class="stat-name">{{ key.toUpperCase() }}:</span>
+              <span>{{ value }}</span>
+              <button
+                v-if="attributePoints > 0"
+                class="attr-btn"
+                @click="upgradeAttribute(key)"
+              >+</button>
+            </div>
           </div>
-        </div>
-        <div class="login" v-else>
-          <button
-            v-if="username !== ''"
-            class="attr-btn"
-            @click="join">
-            Entrar no jogo
-          </button>
+          <div class="login" v-else>
+            <button
+              v-if="username !== ''"
+              class="attr-btn"
+              @click="join">
+              Entrar no jogo
+            </button>
+          </div>
         </div>
       </section>
       <div></div>
