@@ -192,7 +192,7 @@
     createApp({
       data() {
         return {
-          needsPermission: false,
+          needsPermission: true,
           username: '',
           playerColor: '',
           level: 0,
@@ -283,6 +283,7 @@
               this.updateStatus(data.status);
               this.playerColor = data.status.color;
             }
+            this.needsPermission = false;
           } catch (e) {
             this.needsPermission = true;
             this.username = '';
