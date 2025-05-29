@@ -286,11 +286,13 @@
             });
             const data = await res.json();
             this.username = data.username;
+            this.needsPermission = false;
             if (data.status) {
               this.updateStatus(data.status);
               this.playerColor = data.status.color;
             }
           } catch (e) {
+            this.needsPermission = true;
             this.username = '';
             this.log('Erro ao buscar usuário.');
           }
