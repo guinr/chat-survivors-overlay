@@ -200,7 +200,7 @@
       data() {
         return {
           needsPermission: true,
-          username: '',
+          username: undefined,
           playerColor: '',
           level: 0,
           hp: { actual: 0, max: 0 },
@@ -286,6 +286,7 @@
             });
             const data = await res.json();
             this.username = data.username;
+            console.log('Usuário:', this.username);
             this.needsPermission = false;
             if (data.status) {
               this.updateStatus(data.status);
