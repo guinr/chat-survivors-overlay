@@ -286,8 +286,7 @@
             });
             const data = await res.json();
             this.username = data.username;
-            console.log('Usuário:', this.username);
-            this.needsPermission = false;
+            this.needsPermission = this.username === undefined;
             if (data.status) {
               this.updateStatus(data.status);
               this.playerColor = data.status.color;
