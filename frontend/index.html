@@ -18,38 +18,81 @@
       flex-direction: column;
       height: 100vh;
       width: 100vw;
-    }
-
-    #app {
-      display: grid;
-      grid-template-rows: 1fr;
-    }
-
-    main {
-      border-radius: 3px;
-      width: 100vw;
-      height: 100%;
-      display: grid;
-      grid-template-columns: 21vw 58vw 21vw;
-    }
-
-    section {
-      width: 20vw;
-      height: 100%;
-      font-size: 1.2em;
-      padding: 3em 0.5em 0.5em 0.5em;
-      background: rgba(0, 0, 0, 1);
-      border-radius: 0 3px 3px 0;
-    }
-
-    .name-label {
-      text-align: center;
-      font-size: 1.4em;
+      max-height: 1080px;
+      max-width: 1920px;
       text-shadow:
         -1px -1px 0 #000,
         1px -1px 0 #000,
         -1px  1px 0 #000,
         1px  1px 0 #000;
+    }
+
+    button {
+      background-color: rgb(215, 209, 167);
+      border: none;
+      border-radius: 3px;
+      color: white;
+      padding: 0.5em 1em;
+      font-size: 1em;
+      cursor: pointer;
+      text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px  1px 0 #000,
+        1px  1px 0 #000;
+    }
+
+    button:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    button:disabled {
+      background-color: rgba(255, 255, 255, 0.05);
+      cursor: not-allowed;
+    }
+
+    button:active {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    #app {
+      background: url('bg.png') no-repeat center center;
+    }
+
+    main {
+      width: 100%;
+      height: 100%;
+      border-radius: 3px;
+      display: grid;
+      grid-template-columns: 21% 58% 21%;
+    }
+
+    section {
+      position: relative;
+      font-size: 1.2em;
+      padding: 3em 0.5em 0.5em 0.5em;
+      background: rgb(204, 184, 141);
+      border-radius: 0 3px 3px 0;
+    }
+
+    section::after {
+      height: 100%;
+      width: 30px;
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -30px;
+      background: linear-gradient(to right, rgb(204, 184, 141), rgba(0, 0, 0, 0));
+    }
+
+    .right-section::after {
+      background: linear-gradient(to left, rgb(204, 184, 141), rgba(0, 0, 0, 0));
+      left: -30px;
+    }
+
+    .name-label {
+      text-align: center;
+      font-size: 1.4em;
     }
 
     .stat {
@@ -69,7 +112,6 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100%;
       width: 100%;
       padding: 1em 0;
     }
@@ -93,25 +135,18 @@
       background-color: rgba(255, 255, 255, 0.3);
     }
 
-    #log {
-      height: 48px;
-      width: 100vw;
-      overflow-y: auto;
-      font-size: 0.6em;
-      text-align: left;
-      background: rgba(0, 0, 0, 0.4);
-      border-radius: 3px 3px 0 0;
+    .right-section {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
-    .log-entry {
-      margin-bottom: 0.25em;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding-bottom: 0.25em;
-    }
-
-    .log-time {
-      color: #ccc;
-      font-weight: bold;
+    .right-section button {
+      width: 100%;
+      max-width: 200px;
+      padding: 1em;
+      margin-top: 1em;
     }
   </style>
 </head>
@@ -145,14 +180,13 @@
         </div>
       </section>
       <div></div>
-      <section></section>
+      <section class="right-section">
+        <div>Autorize o uso do seu nome para jogar.</div>
+        <button @click="window.Twitch.ext.actions.requestIdShare()">
+          Autorizar
+        </button>
+      </section>
     </main>
-
-    <footer id="log" v-if="logs.length > 0">
-      <div v-for="entry in logs" class="log-entry">
-        <span class="log-time">[{{ entry.time }}]</span> {{ entry.message }}
-      </div>
-    </footer>
   </div>
 
   <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
@@ -162,6 +196,7 @@
     createApp({
       data() {
         return {
+          needsPermission: false,
           username: '',
           playerColor: '',
           level: 0,
@@ -253,7 +288,8 @@
               this.playerColor = data.status.color;
             }
           } catch (e) {
-            this.username = 'Erro';
+            this.needsPermission = true;
+            this.username = '';
             this.log('Erro ao buscar usuário.');
           }
         },
