@@ -177,10 +177,12 @@
       </section>
       <div></div>
       <section class="right-section">
-        <div>Autorize o uso do seu nome para jogar.</div>
-        <button @click="requestAuthorization" v-if="needsPermission">
-          Autorizar
-        </button>
+        <div v-if="needsPermission">
+          <div>Autorize o uso do seu nome para jogar.</div>
+          <button @click="requestAuthorization">
+            Autorizar
+          </button>
+        </div>
       </section>
     </main>
   </div>
