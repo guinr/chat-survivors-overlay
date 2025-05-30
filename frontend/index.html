@@ -237,7 +237,7 @@
   <div id="app">
     <main>
       <section>
-        <div class="info" v-if="needsPermission">
+        <div class="info" v-if="!needsPermission">
           <h1 :style="{ color: nameColorStyle }" class="name-label">{{ username }}</h1>
           <div v-if="level > 0">
             <h2>Nível {{ level }}</h2>
