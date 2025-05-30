@@ -311,13 +311,6 @@
         };
       },
       computed: {
-        isWebSocketOpen() {
-          return (
-            typeof WebSocket !== 'undefined' &&
-            this.ws &&
-            this.ws.readyState === WebSocket.OPEN
-          );
-        },
         nameColorStyle() {
           if (!this.playerColor) return 'rgb(209, 182, 145)';
           const parts = this.playerColor
@@ -355,15 +348,6 @@
           };
         }
       },
-      watch: {
-        isWebSocketOpen(newVal) {
-          if (newVal) {
-            this.log('WebSocket está aberto.');
-          } else {
-            this.log('WebSocket não está aberto.');
-          }
-        }
-      },
       methods: {
         log(message) {
           const time = new Date().toLocaleTimeString('pt-BR');
@@ -392,7 +376,7 @@
           this.ws.onerror = () => this.log('Erro no WebSocket.');
           this.ws.onclose = () => {
             this.log('WebSocket desconectado. Reconectando em 3s...');
-            setTimeout(this.connectWebSocket, 3000);
+            setTimeout(this.connectWebSocket, 1000);
           };
         },
         join() {
