@@ -10,7 +10,8 @@
       margin: 0;
       padding: 0;
       background: transparent;
-      color: white;
+      font-size: 18px;
+      color: #64461f;
       font-family: sans-serif;
       display: flex;
       justify-content: center;
@@ -18,26 +19,32 @@
       flex-direction: column;
       height: 100vh;
       width: 100vw;
-      text-shadow:
-        -1px -1px 0 #000,
-        1px -1px 0 #000,
-        -1px  1px 0 #000,
-        1px  1px 0 #000;
     }
 
-    button {
-      background-color: rgb(55, 55, 55);
-      border: none;
-      border-radius: 3px;
-      color: white;
-      padding: 0.5em 1em;
-      font-size: 1em;
+    .popup-btn {
+      position: relative;
+      font-weight: bold;
+      padding: 0.3em 1em;
+      background-color: #d1b691;
+      border: 3px solid #64461f;
+      color: #64461f;
+      box-shadow:
+        2px 2px 0 #64461f,
+        4px 4px 0 #4a3414;
       cursor: pointer;
-      text-shadow:
-        -1px -1px 0 #000,
-        1px -1px 0 #000,
-        -1px  1px 0 #000,
-        1px  1px 0 #000;
+      user-select: none;
+      outline: none;
+
+      animation: popup 0.2s ease-out;
+      transform-origin: center;
+      transition: background-color 0.2s ease;
+    }
+
+    .popup-btn:active {
+      transform: translateY(2px);
+      box-shadow:
+        1px 1px 0 #4a3414,
+        2px 2px 0 #3a270f;
     }
 
     main {
@@ -50,10 +57,8 @@
 
     section {
       position: relative;
-      font-size: 1.2em;
       padding: 3em 0.5em 0.5em 0.5em;
-      background: rgb(0, 0, 0);
-      border-radius: 0 3px 3px 0;
+      background-color: #d1b691;
     }
 
     section::after {
@@ -63,11 +68,11 @@
       position: absolute;
       top: 0;
       right: -30px;
-      background: linear-gradient(to right, rgb(0, 0, 0), rgba(0, 0, 0, 0));
+      background: linear-gradient(to right, rgb(209, 182, 145), rgba(209, 182, 145, 0));
     }
 
     .right-section::after {
-      background: linear-gradient(to left, rgb(0, 0, 0), rgba(0, 0, 0, 0));
+      background: linear-gradient(to left, rgb(209, 182, 145), rgba(209, 182, 145, 0));
       left: -30px;
     }
 
@@ -208,7 +213,6 @@
             <div class="stat" v-for="(value, key) in attributes" :key="key">
               <button
                 :disabled="attributePoints <= 0"
-                class="stats-btn"
                 @click="upgradeAttribute(key)">
                 <span>{{ key.slice(0, 3).toUpperCase() }}</span>
                 <span>{{ value }}</span>
@@ -217,7 +221,7 @@
           </div>
           <div class="login" v-else>
             <button
-              class="attr-btn"
+              class="popup-btn"
               @click="join">
               Entrar no jogo
             </button>
@@ -228,7 +232,9 @@
       <section class="right-section">
         <div class="needs-permission-section" v-if="needsPermission">
           <div>Autorize o uso do seu nome para jogar.</div>
-          <button @click="requestAuthorization">
+          <button
+            class="popup-btn"
+            @click="requestAuthorization">
             Autorizar
           </button>
         </div>
