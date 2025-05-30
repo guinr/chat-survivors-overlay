@@ -28,14 +28,21 @@
       padding: 0;
       font-weight: bold;
       text-align: center;
+      margin-bottom: -31px;
+    }
+
+    .level {
+      margin-bottom: 0;
     }
 
     .popup-btn {
       position: relative;
+      font-size: 1em;
       font-weight: bold;
       padding: 0.3em 1em;
       background-color: #d1b691;
       border: 3px solid #64461f;
+      border-radius: 48px;
       color: #64461f;
       box-shadow:
         2px 2px 0 #64461f,
@@ -101,10 +108,15 @@
       gap: 0.5em;
       max-width: 100%;
       transition: max-width 0.3s ease;
+      padding: 2.5em 0;
     }
 
     .stat-with-points {
-      max-width: calc(100% - 67px);
+      max-width: calc(100% - 21px);
+    }
+
+    .stat-with-points > .stats-btn {
+      padding-right: 2em;
     }
 
     .stat-name {
@@ -129,8 +141,8 @@
       padding: 0.5em;
       min-width: 6em;
       background-color: #d1b691;
-      border: none;
       border: 3px solid #64461f;
+      border-radius: 48px;
       color: #64461f;
     }
 
@@ -139,13 +151,14 @@
       position: absolute;
       width: 33px;
       top: -3px;
-      right: -66px;
+      right: -19px;
       background-color: #d1b691;
       height: 100%;
       padding: 0 0.5em;
       line-height: 2;
       font-weight: bold;
       border: 3px solid #64461f;
+      border-radius: 48px;
       box-shadow: 
         2px 2px 0 #64461f,
         4px 4px 0 #4a3414;
@@ -194,9 +207,7 @@
     .right-section button {
       width: 100%;
       max-width: 200px;
-      padding: 1em;
-      margin-top: 1em;
-      font-size: 1em;
+      margin-top: 3em;
     }
 
     .needs-permission-section {
@@ -205,10 +216,11 @@
       align-items: center;
     }
 
-    .hp-bar-container {
+    .bar-container {
       height: 24px;
       background-color: #d1b691;
       border: 3px solid #64461f;
+      border-radius: 48px;
       overflow: hidden;
       margin-bottom: 1em;
     }
@@ -216,14 +228,6 @@
     .hp-bar-fill {
       height: 100%;
       transition: width 0.3s ease, background 0.3s ease;
-    }
-
-    .xp-bar-container {
-      height: 16px;
-      background-color: #d1b691;
-      border: 3px solid #64461f;
-      overflow: hidden;
-      margin-bottom: 1em;
     }
 
     .xp-bar-fill {
@@ -237,16 +241,16 @@
   <div id="app">
     <main>
       <section>
-        <div class="info" v-if="!needsPermission">
+        <div class="info" v-if="debug || !needsPermission">
           <h1 :style="{ color: nameColorStyle }" class="name-label">{{ username }}</h1>
           <div v-if="level > 0">
-            <h2>Nível {{ level }}</h2>
+            <h2 class="level">Nível {{ level }}</h2>
             <h2>XP {{ experience }} / {{ experience_to_next_level }}</h2>
-            <div class="xp-bar-container">
+            <div class="bar-container">
               <div class="xp-bar-fill" :style="xpBarStyle"></div>
             </div>
             <h2>HP {{ hp.actual }} / {{ hp.max }}</h2>
-            <div class="hp-bar-container">
+            <div class="bar-container">
               <div
                 class="hp-bar-fill"
                 :style="hpBarStyle">
@@ -295,6 +299,7 @@
     createApp({
       data() {
         return {
+          debug: false,
           needsPermission: true,
           retractStatusBar: false,
           username: undefined,
