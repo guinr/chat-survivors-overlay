@@ -450,8 +450,9 @@
             this.retractStatusBar = true;
           } else {
             setTimeout(() => {
-              console.log('Recolhendo barra de status');
-              this.retractStatusBar = false;
+              if (this.attributePoints === 0) {
+                this.retractStatusBar = false;
+              }
             }, 400);
           }
           this.attributes = {
