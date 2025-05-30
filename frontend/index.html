@@ -27,6 +27,7 @@
       margin: 0;
       padding: 0;
       font-weight: bold;
+      text-align: center;
     }
 
     .popup-btn {
@@ -84,6 +85,10 @@
       left: -30px;
     }
 
+    .info {
+      overflow: hidden;
+    }
+
     .name-label {
       text-align: center;
       font-size: 2em;
@@ -92,9 +97,14 @@
     }
 
     .stat {
-      max-width: 80%;
       display: grid;
       gap: 0.5em;
+      max-width: 100%;
+      transition: max-width 0.3s ease;
+    }
+
+    .stat-with-points {
+      max-width: 80%;
     }
 
     .stat-name {
@@ -186,6 +196,7 @@
       max-width: 200px;
       padding: 1em;
       margin-top: 1em;
+      font-size: 1em;
     }
 
     .needs-permission-section {
@@ -195,10 +206,9 @@
     }
 
     .hp-bar-container {
-      width: 100%;
       height: 24px;
       background-color: #d1b691;
-      border: 2px solid #64461f;
+      border: 3px solid #64461f;
       overflow: hidden;
       margin-bottom: 1em;
     }
@@ -207,16 +217,34 @@
       height: 100%;
       transition: width 0.3s ease, background 0.3s ease;
     }
+
+    .xp-bar-container {
+      height: 16px;
+      background-color: #d1b691;
+      border: 3px solid #64461f;
+      overflow: hidden;
+      margin-bottom: 1em;
+    }
+
+    .xp-bar-fill {
+      height: 100%;
+      background-color: #50ada4;
+      transition: width 0.3s ease;
+    }
   </style>
 </head>
 <body>
   <div id="app">
     <main>
       <section>
-        <div v-if="needsPermission">
+        <div class="info" v-if="needsPermission">
           <h1 :style="{ color: nameColorStyle }" class="name-label">{{ username }}</h1>
           <div v-if="level > 0">
             <h2>Nível {{ level }}</h2>
+            <h2>XP {{ experience }} / {{ experience_to_next_level }}</h2>
+            <div class="xp-bar-container">
+              <div class="xp-bar-fill" :style="xpBarStyle"></div>
+            </div>
             <h2>HP {{ hp.actual }} / {{ hp.max }}</h2>
             <div class="hp-bar-container">
               <div
@@ -225,8 +253,7 @@
               </div>
             </div>
             <h2>Points {{ attributePoints }}</h2>
-
-            <div class="stat">
+            <div class="stat" :class="{ 'stat-with-points': retractStatusBar }">
               <button
                 v-for="(value, key, index) in attributes" :key="key"
                 :style="`--delay: ${index * 0.2}s`"
@@ -250,7 +277,7 @@
       <div></div>
       <section class="right-section">
         <div class="needs-permission-section" v-if="needsPermission">
-          <div>Autorize o uso do seu nome para jogar.</div>
+          <h1>Autorize o uso do seu nome para jogar.</h1>
           <button
             class="popup-btn"
             @click="requestAuthorization">
@@ -269,9 +296,12 @@
       data() {
         return {
           needsPermission: true,
-          username: undefined,
+          retractStatusBar: false,
+          username: undefined || 'digimoes',
           playerColor: '',
           level: 0,
+          experience: 0,
+          experience_to_next_level: 0,
           hp: { actual: 0, max: 100 },
           attributes: { strength: 0, agility: 0, vitality: 0, luck: 0 },
           attributePoints: 0,
@@ -313,6 +343,15 @@
           return {
             width: `${percent}%`,
             backgroundColor: color
+          };
+        },
+        xpBarStyle() {
+          const percent = this.experience_to_next_level > 0
+            ? (this.experience / this.experience_to_next_level) * 100
+            : 0;
+
+          return {
+            width: `${Math.min(percent, 100)}%`
           };
         }
       },
@@ -386,6 +425,8 @@
             status.color = '(255, 255, 255, 1)';
             this.playerColor = null;
             this.level = 0;
+            this.experience = 0;
+            this.experience_to_next_level = 0;
             this.hp = { actual: 0, max: 0 };
             this.attributePoints = 0;
             this.attributes = {
@@ -398,11 +439,21 @@
           }
 
           this.level = status.level;
+          this.experience = status.experience;
+          this.experience_to_next_level = status.experience_to_next_level;
           this.hp = {
             actual: status.actual_health,
             max: status.max_health
           };
           this.attributePoints = status.available_stat_points || 0;
+          if (this.attributePoints > 0) {
+            this.retractStatusBar = true;
+          } else {
+            setTimeout(() => {
+              console.log('Recolhendo barra de status');
+              this.retractStatusBar = false;
+            }, 400);
+          }
           this.attributes = {
             strength: status.attributes.strength,
             agility: status.attributes.agility,
