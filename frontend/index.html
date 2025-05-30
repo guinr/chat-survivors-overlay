@@ -212,6 +212,7 @@
 
             <div class="stat" v-for="(value, key) in attributes" :key="key">
               <button
+                class="stats-btn"
                 :disabled="attributePoints <= 0"
                 @click="upgradeAttribute(key)">
                 <span>{{ key.slice(0, 3).toUpperCase() }}</span>
