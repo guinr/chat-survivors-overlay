@@ -249,7 +249,7 @@
 <body>
   <div id="app">
     <section v-if="!isPlaying" class="login">
-      <div v-if="!needsPermission" class="permission">
+      <div v-if="needsPermission" class="permission">
         <span>Autorize o uso do seu nome para jogar.</span>
         <button @click="requestAuthorization">Autorizar</button>
       </div>
