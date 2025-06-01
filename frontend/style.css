@@ -1,0 +1,244 @@
+body, html, #app {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  font-size: 16px;
+  color: #64461f;
+}
+
+#app {
+  padding: 0.5em;
+  background-color: #553c14;
+}
+
+.tabs-container {
+  height: calc(100vh - 1em);
+}
+
+nav {
+  display: flex;
+  gap: 0.1em;
+}
+
+button {
+  font-size: 1em;
+  color: #f3e4c3;
+  font-weight: bold;
+  background-color: #64461f;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  padding: 0.5em 1em;
+  box-shadow:
+    4px 4px 8px rgba(0, 0, 0, 0.4),
+    -4px -4px 8px rgba(255, 255, 255, 0.1);
+}
+
+button:active {
+  box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.4),
+              inset -4px -4px 8px rgba(255, 255, 255, 0.1);
+}
+
+nav > button {
+  border-bottom: none;
+  border-radius: 16px 16px 0 0;
+  box-shadow: none;
+}
+
+nav > button:first-child {
+  border-radius: 8px 16px 0 0;
+}
+
+nav > button.selected {
+  color: #64461f;
+  background-color: #f3e4c3;
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+  padding: 0.25em;
+  background-color: #f3e4c3;
+  border-top: none;
+  height: calc(100vh - 36px - 1.5em);
+  border-radius: 8px;
+  overflow-y: auto;
+}
+
+.is-playing {
+  border-radius: 0 8px 8px 8px;
+}
+
+.login {
+  height: calc(100vh - 1.5em);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.login > .permission,
+.login > .join {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5em;
+  margin-bottom: 1em;
+}
+
+.login > .join > span {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #64461f;
+}
+
+label {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  font-weight: bold;
+  font-size: 1em;
+  color: #fff8d3;
+  background-color: #9c8969;
+  padding: 0.25em 0.75em;
+  border-radius: 16px;
+  box-shadow:
+    inset 4px 4px 8px rgba(0, 0, 0, 0.4),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.1);
+}
+
+.username {
+  margin-left: 0.5em;
+  font-size: 1.2em;
+}
+
+.status, .attribute-points {
+  grid-template-rows: repeat(8, 1fr);
+}
+
+.bar {
+  min-height: 16px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.bar .fill {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  bottom: 6px;
+  border-radius: inherit;
+  z-index: 0;
+  transition: width 0.3s ease;
+}
+
+.bar .xp {
+  background-color: #50ada4;
+}
+
+.bar .hp {
+  background-color: #7cbb4e;
+}
+
+.bar > span {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+}
+
+.bar > span:nth-child(3) {
+  text-align: center;
+}
+
+.bar > span:last-child {
+  opacity: 0;
+}
+
+.attribute {
+  width: calc(100% - 1.5em);
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  transition: width 0.3s ease;
+}
+
+.attribute.with-points {
+  width: calc(100% - 1.5em - 35px);
+}
+
+.attribute.with-points::after {
+  width: 22px;
+  height: 20px;
+  text-align: center;
+  content: '+';
+  position: absolute;
+  top: calc(50% - 12px);
+  right: -2em;
+  color: #64461f;
+  font-weight: bold;
+  box-shadow:
+    4px 4px 8px rgba(0, 0, 0, 0.4),
+    -4px -4px 8px rgba(255, 255, 255, 0.1);
+  padding: 2px 0 0 0;
+  border-radius: 48px;
+  border: 2px solid #9c8969;
+  transform: translateY(-2px);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  animation: popup 0.2s ease-out forwards;
+  opacity: 0;
+  animation-delay: var(--delay, 0s);
+  cursor: pointer;
+}
+
+@keyframes popup {
+  0% {
+    transform: translateY(-10px) scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(-2px) scale(1);
+    opacity: 1;
+  }
+}
+
+.attribute:disabled::after {
+  animation: afterExit 0.3s ease forwards;
+  pointer-events: none;
+  animation-delay: 0s !important;
+}
+
+@keyframes afterExit {
+  from {
+    opacity: 1;
+    transform: translateY(-2px) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px) scale(0.8);
+  }
+}
+
+.inventory {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(48px, auto));
+  grid-auto-rows: 48px;
+  background-color: #f3e4c3;
+  border-radius: 0 0 3px 3px;
+}
+
+.box {
+  width: 48px;
+  height: 48px;
+  background-color: #64461f;
+  color: #f3e4c3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  border-radius: 12px;
+  box-shadow:
+    inset 4px 4px 8px rgba(0, 0, 0, 0.4),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.1);
+}

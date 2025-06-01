@@ -1,0 +1,23 @@
+{
+  "author_name": "Digi Dev",
+  "description": "Overlay leve que mostra o nome do espectador e dados do jogo em tempo real.",
+  "name": "Chat Survivors Overlay",
+  "version": "1.0",
+  "support_email": "guigonunes@gmail.com",
+  "frontend": {
+    "overlay": {
+      "viewer_url": "https://chat-survivors-overlay-server.onrender.com/index.html",
+      "can_link_external_content": true,
+      "aspect_width": 1920,
+      "aspect_height": 1080,
+      "scale_behavior": "fit"
+    }
+  },
+  "allow_vods": false,
+  "bits_enabled": false,
+  "configurable": false,
+  "live_configurable": false,
+  "whitelisted_urls": [
+    "https://chat-survivors-overlay-server.onrender.com"
+  ]
+}

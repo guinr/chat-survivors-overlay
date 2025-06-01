@@ -3,497 +3,81 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Overlay Vue Twitch</title>
+  <title>Chat Survivors Game Extension</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-  <style>
-    body, html, #app {
-      margin: 0;
-      padding: 0;
-      background: transparent;
-      font-size: 18px;
-      color: #64461f;
-      font-family: sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      height: 100vh;
-      width: 100vw;
-    }
-
-    h1,
-    h2,
-    h3 {
-      margin: 0;
-      padding: 0;
-      font-weight: bold;
-      text-align: center;
-      margin-bottom: -31px;
-    }
-
-    .level {
-      margin-bottom: 0;
-    }
-
-    .popup-btn {
-      position: relative;
-      font-size: 1em;
-      font-weight: bold;
-      padding: 0.3em 1em;
-      background-color: #d1b691;
-      border: 3px solid #64461f;
-      border-radius: 48px;
-      color: #64461f;
-      box-shadow:
-        2px 2px 0 #64461f,
-        4px 4px 0 #4a3414;
-      cursor: pointer;
-      user-select: none;
-      outline: none;
-
-      animation: popup 0.2s ease-out;
-      transform-origin: center;
-      transition: background-color 0.2s ease;
-    }
-
-    .popup-btn:active {
-      transform: translateY(2px);
-      box-shadow:
-        1px 1px 0 #4a3414,
-        2px 2px 0 #3a270f;
-    }
-
-    main {
-      width: 100%;
-      height: 100%;
-      border-radius: 3px;
-      display: grid;
-      grid-template-columns: 21% 58% 21%;
-    }
-
-    section {
-      position: relative;
-      padding: 4em 0.5em 0.5em 0.5em;
-      background-color: #d1b691;
-    }
-
-    section::after {
-      height: 100%;
-      width: 30px;
-      content: '';
-      position: absolute;
-      top: 0;
-      right: -30px;
-      background: linear-gradient(to right, rgb(209, 182, 145), rgba(209, 182, 145, 0));
-    }
-
-    .right-section::after {
-      background: linear-gradient(to left, rgb(209, 182, 145), rgba(209, 182, 145, 0));
-      left: -30px;
-    }
-
-    .info {
-      overflow: hidden;
-    }
-
-    .name-label {
-      text-align: center;
-      font-size: 2em;
-      margin-bottom: 1em;
-      -webkit-text-stroke: 2px #64461f;
-    }
-
-    .stat {
-      display: grid;
-      gap: 0.5em;
-      max-width: 100%;
-      transition: max-width 0.3s ease;
-      padding: 2.5em 0;
-    }
-
-    .stat-with-points {
-      max-width: calc(100% - 21px);
-    }
-
-    .stat-with-points > .stats-btn {
-      padding-right: 2em;
-    }
-
-    .stat-name {
-      text-align: right;
-      padding-right: 0.5em;
-    }
-
-    .login {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      padding: 1em 0;
-    }
-
-    .stats-btn {
-      position: relative;
-      font-size: 1.5em;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      padding: 0.5em;
-      min-width: 6em;
-      background-color: #d1b691;
-      border: 3px solid #64461f;
-      border-radius: 48px;
-      color: #64461f;
-    }
-
-    .stats-btn::after {
-      content: '+1';
-      position: absolute;
-      width: 33px;
-      top: -3px;
-      right: -19px;
-      background-color: #d1b691;
-      height: 100%;
-      padding: 0 0.5em;
-      line-height: 2;
-      font-weight: bold;
-      border: 3px solid #64461f;
-      border-radius: 48px;
-      box-shadow: 
-        2px 2px 0 #64461f,
-        4px 4px 0 #4a3414;
-      transform: translateY(-2px);
-      transition: transform 0.1s ease, box-shadow 0.1s ease;
-      animation: popup 0.2s ease-out forwards;
-      opacity: 0;
-      animation-delay: var(--delay, 0s);
-      cursor: pointer;
-    }
-
-    @keyframes popup {
-      0% {
-        transform: translateY(-10px) scale(0.8);
-        opacity: 0;
-      }
-      100% {
-        transform: translateY(-2px) scale(1);
-        opacity: 1;
-      }
-    }
-
-    @keyframes afterExit {
-      from {
-        opacity: 1;
-        transform: translateY(-2px) scale(1);
-      }
-      to {
-        opacity: 0;
-        transform: translateY(10px) scale(0.8);
-      }
-    }
-
-    .stats-btn:disabled::after {
-      animation: afterExit 0.3s ease forwards;
-      pointer-events: none;
-      animation-delay: 0s !important;
-    }
-
-    .right-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .right-section button {
-      width: 100%;
-      max-width: 200px;
-      margin-top: 3em;
-    }
-
-    .needs-permission-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .bar-container {
-      height: 24px;
-      background-color: #d1b691;
-      border: 3px solid #64461f;
-      border-radius: 48px;
-      overflow: hidden;
-      margin-bottom: 1em;
-    }
-
-    .hp-bar-fill {
-      height: 100%;
-      transition: width 0.3s ease, background 0.3s ease;
-    }
-
-    .xp-bar-fill {
-      height: 100%;
-      background-color: #50ada4;
-      transition: width 0.3s ease;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="main.css">
 </head>
 <body>
   <div id="app">
-    <main>
-      <section>
-        <div class="info" v-if="!needsPermission">
-          <h1 :style="{ color: nameColorStyle }" class="name-label">{{ username }}</h1>
-          <div v-if="level > 0">
-            <h2 class="level">Level {{ level }}</h2>
-            <h2>XP {{ experience }} / {{ experience_to_next_level }}</h2>
-            <div class="bar-container">
-              <div class="xp-bar-fill" :style="xpBarStyle"></div>
-            </div>
-            <h2>HP {{ hp.actual }} / {{ hp.max }}</h2>
-            <div class="bar-container">
-              <div
-                class="hp-bar-fill"
-                :style="hpBarStyle">
-              </div>
-            </div>
-            <h2>Points {{ attributePoints }}</h2>
-            <div class="stat" :class="{ 'stat-with-points': retractStatusBar }">
-              <button
-                v-for="(value, key, index) in attributes" :key="key"
-                :style="`--delay: ${index * 0.2}s`"
-                class="stats-btn"
-                :disabled="attributePoints <= 0"
-                @click="upgradeAttribute(key)">
-                <span>{{ key.slice(0, 3).toUpperCase() }}</span>
-                <span>{{ value }}</span>
-              </button>
-            </div>
-          </div>
-          <div class="login" v-else>
-            <button
-              class="popup-btn"
-              @click="join">
-              Entrar no jogo
-            </button>
-          </div>
+    <section v-if="!isPlaying" class="login">
+      <div v-if="needsPermission" class="permission">
+        <span>Authorize the use of your name to play.</span>
+        <button @click="requestAuthorization">Authorize</button>
+      </div>
+      <div v-else class="join">
+        <span :style="{ color: nameColorStyle }">{{ username }}</span>
+        <button @click="join">Enter game</button>
+      </div>
+    </section>
+
+    <div v-else class="tabs-container">
+      <nav>
+        <button
+          @click="tab = 'STATUS'"
+          :class="{ selected: tab === 'STATUS' }"
+          :style="{ color: nameColorStyle }">
+          {{ username }}
+        </button>
+        <button
+          @click="tab = 'INVENTORY'"
+          :class="{ selected: tab === 'INVENTORY' }">
+          Inventory
+        </button>
+      </nav>
+
+      <section v-if="tab === 'STATUS'" class="status" :class="{ 'is-playing': isPlaying }">
+        <label>Lv {{ level }}</label>
+
+        <label class="bar">
+          <div class="fill xp" :style="xpBarStyle"></div>
+          <span>XP</span>
+          <span>{{ experience }} / {{ experience_to_next_level }}</span>
+          <span>XP</span>
+        </label>
+
+        <label class="bar">
+          <div class="fill hp" :style="hpBarStyle"></div>
+          <span>HP</span>
+          <span>{{ hp.actual }} / {{ hp.max }}</span>
+          <span>HP</span>
+        </label>
+
+        <label>Points {{ attributePoints }}</label>
+        <label
+          class="attribute"
+          v-for="(value, attr, index) in attributes"
+          :key="attr"
+          :style="`--delay: ${index * 0.2}s`"
+          :class="{ 'with-points': attributePoints > 0 }"
+          @click="upgradeAttribute(attr)">
+          <span>{{ attr.slice(0, 3).toUpperCase() }}</span>
+          <span></span>
+          <span>{{ value }}</span>
+        </label>
+      </section>
+
+      <section v-if="tab === 'INVENTORY'" class="inventory" :class="{ 'is-playing': isPlaying }">
+        <div
+          v-for="n in 48"
+          :key="n"
+          class="box">
         </div>
       </section>
-      <div></div>
-      <section class="right-section">
-        <div class="needs-permission-section" v-if="needsPermission">
-          <h1>Autorize o uso do seu nome para jogar.</h1>
-          <button
-            class="popup-btn"
-            @click="requestAuthorization">
-            Autorizar
-          </button>
-        </div>
-      </section>
-    </main>
+    </div>
   </div>
 
   <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
-  <script>
-    const { createApp } = Vue;
-
-    createApp({
-      data() {
-        return {
-          debug: false,
-          needsPermission: true,
-          retractStatusBar: false,
-          username: undefined,
-          playerColor: '',
-          level: 0,
-          experience: 0,
-          experience_to_next_level: 0,
-          hp: { actual: 0, max: 100 },
-          attributes: { strength: 0, agility: 0, vitality: 0, luck: 0 },
-          attributePoints: 0,
-          ws: null,
-          logs: [],
-          API_URL: 'https://chat-survivors-overlay-server.onrender.com'
-        };
-      },
-      computed: {
-        nameColorStyle() {
-          if (!this.playerColor) return 'rgb(209, 182, 145)';
-          const parts = this.playerColor
-            .replace(/[()]/g, '')
-            .split(',')
-            .map(v => parseFloat(v.trim()));
-
-          if (parts.length !== 4) return '';
-
-          const [r, g, b, a] = parts;
-          return `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
-        },
-        hpBarStyle() {
-          const percent = this.hp.max > 0 ? (this.hp.actual / this.hp.max) * 100 : 0;
-          let color = '#7cbb4e';
-
-          if (percent <= 33) {
-            color = '#db4c4c';
-          } else if (percent <= 66) {
-            color = '#e7e45a';
-          }
-
-          return {
-            width: `${percent}%`,
-            backgroundColor: color
-          };
-        },
-        xpBarStyle() {
-          const percent = this.experience_to_next_level > 0
-            ? (this.experience / this.experience_to_next_level) * 100
-            : 0;
-
-          return {
-            width: `${Math.min(percent, 100)}%`
-          };
-        }
-      },
-      methods: {
-        log(message) {
-          const time = new Date().toLocaleTimeString('pt-BR');
-          this.logs.push({ time, message });
-          if (this.logs.length > 100) this.logs.shift();
-        },
-        connectWebSocket() {
-          this.ws = new WebSocket('wss://chat-survivors-overlay-server.onrender.com');
-          this.ws.onopen = () => this.log('WebSocket conectado.');
-
-          this.ws.onmessage = (event) => {
-            try {
-              const data = JSON.parse(event.data);
-              if (
-                data.action === 'status_broadcast' &&
-                data.status.name.toLowerCase() === this.username.toLowerCase()
-              ) {
-                this.delayedUpdateStatus(data.status);
-                this.playerColor = data.status.color;
-              }
-            } catch (e) {
-              this.log('Erro ao processar mensagem WS.');
-            }
-          };
-
-          this.ws.onerror = () => this.log('Erro no WebSocket.');
-          this.ws.onclose = () => {
-            this.log('WebSocket desconectado. Reconectando em 3s...');
-            setTimeout(this.connectWebSocket, 1000);
-          };
-        },
-        join() {
-          this.ws.send(JSON.stringify({
-            name: this.username,
-            action: 'join'
-          }));
-          this.log(`Enviado: join (${this.username})`);
-        },
-        async fetchUserInfo(authToken) {
-          try {
-            const res = await fetch(`${this.API_URL}/get-username`, {
-              headers: { Authorization: `Bearer ${authToken}` }
-            });
-            const data = await res.json();
-            this.username = data.username;
-            this.needsPermission = this.username === undefined;
-            if (data.status) {
-              this.updateStatus(data.status);
-              this.playerColor = data.status.color;
-            }
-          } catch (e) {
-            this.needsPermission = true;
-            this.username = '';
-            this.log('Erro ao buscar usuário.');
-          }
-        },
-        delayedUpdateStatus(newStatus) {
-          this.updateTimeout = setTimeout(() => {
-            this.updateStatus(newStatus);
-          }, 2000);
-        },
-        updateStatus(status) {
-          if (status.actual_health === 0) {
-            status.color = '(255, 255, 255, 1)';
-            this.playerColor = null;
-            this.level = 0;
-            this.experience = 0;
-            this.experience_to_next_level = 0;
-            this.hp = { actual: 0, max: 0 };
-            this.attributePoints = 0;
-            this.attributes = {
-              strength: 0,
-              agility: 0,
-              vitality: 0,
-              luck: 0
-            };
-            return;
-          }
-
-          this.level = status.level;
-          this.experience = status.experience;
-          this.experience_to_next_level = status.experience_to_next_level;
-          this.hp = {
-            actual: status.actual_health,
-            max: status.max_health
-          };
-          this.attributePoints = status.available_stat_points || 0;
-          if (this.attributePoints > 0) {
-            this.retractStatusBar = true;
-          } else {
-            setTimeout(() => {
-              if (this.attributePoints === 0) {
-                this.retractStatusBar = false;
-              }
-            }, 400);
-          }
-          this.attributes = {
-            strength: status.attributes.strength,
-            agility: status.attributes.agility,
-            vitality: status.attributes.vitality,
-            luck: status.attributes.luck
-          };
-        },
-        upgradeAttribute(attr) {
-          if (this.attributePoints > 0) {
-            const attrMap = {
-              strength: "for",
-              agility: "agi",
-              vitality: "vit",
-              luck: "sor"
-            };
-
-            const actionCode = attrMap[attr];
-
-            if (!actionCode) {
-              this.log(`Atributo desconhecido: ${attr}`);
-              return;
-            }
-
-            const command = {
-              name: this.username,
-              action: actionCode,
-              value: 1
-            };
-
-            this.ws.send(JSON.stringify(command));
-            this.log(`Enviado: ${JSON.stringify(command)}`);
-          }
-        },
-        requestAuthorization() {
-          window.Twitch.ext.actions.requestIdShare();
-          this.log('Solicitação de autorização enviada.');
-        }
-      },
-      mounted() {
-        this.connectWebSocket();
-        window.Twitch.ext.onAuthorized(auth => {
-          this.fetchUserInfo(auth.token);
-        });
-      }
-    }).mount('#app');
-  </script>
+  <script src="main.js"></script>
 </body>
 </html>
