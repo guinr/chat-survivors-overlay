@@ -241,10 +241,10 @@
   <div id="app">
     <main>
       <section>
-        <div class="info" v-if="debug || !needsPermission">
+        <div class="info" v-if="!needsPermission">
           <h1 :style="{ color: nameColorStyle }" class="name-label">{{ username }}</h1>
           <div v-if="level > 0">
-            <h2 class="level">Nível {{ level }}</h2>
+            <h2 class="level">Level {{ level }}</h2>
             <h2>XP {{ experience }} / {{ experience_to_next_level }}</h2>
             <div class="bar-container">
               <div class="xp-bar-fill" :style="xpBarStyle"></div>
@@ -370,7 +370,7 @@
                 data.action === 'status_broadcast' &&
                 data.status.name.toLowerCase() === this.username.toLowerCase()
               ) {
-                this.updateStatus(data.status);
+                this.delayedUpdateStatus(data.status);
                 this.playerColor = data.status.color;
               }
             } catch (e) {
@@ -408,6 +408,11 @@
             this.username = '';
             this.log('Erro ao buscar usuário.');
           }
+        },
+        delayedUpdateStatus(newStatus) {
+          this.updateTimeout = setTimeout(() => {
+            this.updateStatus(newStatus);
+          }, 2000);
         },
         updateStatus(status) {
           if (status.actual_health === 0) {

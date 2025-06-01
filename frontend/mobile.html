@@ -9,119 +9,305 @@
     body, html, #app {
       margin: 0;
       padding: 0;
-      background: transparent;
-      color: white;
       font-family: sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      height: 100vh;
-      width: 100vw;
+      font-size: 18px;
+      color: #64461f;
+      background-color: #553c14;
     }
 
     #app {
-      display: grid;
-      grid-template-rows: 1fr;
+      padding: 0.5em;
     }
 
-    main {
-      border-radius: 3px;
-      width: 100vw;
-      height: 100%;
+    .tabs-container {
+      height: calc(100vh - 1em);
+    }
+
+    nav {
+      display: flex;
+      gap: 0.1em;
+    }
+
+    button {
+      font-size: 1em;
+      color: #f3e4c3;
+      font-weight: bold;
+      background-color: #64461f;
+      border: 1px solid transparent;
+      border-radius: 16px;
+      padding: 0.5em 1em;
+      box-shadow:
+        4px 4px 8px rgba(0, 0, 0, 0.4),
+        -4px -4px 8px rgba(255, 255, 255, 0.1);
+    }
+
+    button:active {
+      box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.4),
+                  inset -4px -4px 8px rgba(255, 255, 255, 0.1);
+    }
+
+    nav > button {
+      border-bottom: none;
+      border-radius: 16px 16px 0 0;
+      box-shadow: none;
+    }
+
+    nav > button:first-child {
+      border-radius: 8px 16px 0 0;
+    }
+
+    nav > button.selected {
+      color: #64461f;
+      background-color: #f3e4c3;
     }
 
     section {
-      width: 100vw;
-      height: 100%;
-      font-size: 1.2em;
-      padding: 3em 0.5em 0.5em 0.5em;
-      background: rgba(0, 0, 0, 1);
-      border-radius: 0 3px 3px 0;
-    }
-
-    .name-label {
-      text-align: center;
-      font-size: 1.4em;
-      text-shadow:
-        -1px -1px 0 #000,
-        1px -1px 0 #000,
-        -1px  1px 0 #000,
-        1px  1px 0 #000;
-    }
-
-    .stat {
-      max-width: 256px;
-      font-size: 0.8em;
-      margin: 0.3em 0;
       display: grid;
-      grid-template-columns: 45% 15% 1fr;
+      gap: 0.25em;
+      padding: 0.25em;
+      background-color: #f3e4c3;
+      border-top: none;
+      height: calc(100vh - 41px - 1.5em);
+      border-radius: 8px;
+      overflow-y: auto;
     }
 
-    .stat-name {
-      text-align: right;
-      padding-right: 0.5em;
+    .is-playing {
+      border-radius: 0 8px 8px 8px;
     }
 
     .login {
+      height: calc(100vh - 1.5em);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login > .permission,
+    .login > .join {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5em;
+      margin-bottom: 1em;
+    }
+
+    .login > .join > span {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #64461f;
+    }
+
+    label {
+      height: 24px;
+      font-weight: bold;
+      font-size: 1.2em;
+      color: #fff8d3;
+      background-color: #9c8969;
+      padding: 0.25em 0.75em;
+      border-radius: 16px;
+      box-shadow:
+        inset 4px 4px 8px rgba(0, 0, 0, 0.4),
+        inset -4px -4px 8px rgba(255, 255, 255, 0.1);
+    }
+
+    .username {
+      margin-left: 0.5em;
+      font-size: 1.2em;
+    }
+
+    .status, .attribute-points {
+      grid-template-rows: repeat(8, 1fr);
+    }
+
+    .bar {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+
+    .bar .fill {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      bottom: 6px;
+      border-radius: inherit;
+      z-index: 0;
+      transition: width 0.3s ease;
+    }
+
+    .bar .xp {
+      background-color: #50ada4;
+    }
+
+    .bar .hp {
+      background-color: #7cbb4e;
+    }
+
+    .bar > span {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+    }
+
+    .bar > span:nth-child(3) {
+      text-align: center;
+    }
+
+    .bar > span:last-child {
+      opacity: 0;
+    }
+
+    .attribute {
+      width: calc(100% - 1.5em);
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      transition: width 0.3s ease;
+    }
+
+    .attribute.with-points {
+      width: calc(100% - 1.5em - 35px);
+    }
+
+    .attribute.with-points::after {
+      content: '+';
+      position: absolute;
+      top: calc(50% - 14px);
+      right: -1.6em;
+      color: #64461f;
+      font-weight: bold;
+      box-shadow:
+        4px 4px 8px rgba(0, 0, 0, 0.4),
+        -4px -4px 8px rgba(255, 255, 255, 0.1);
+      padding: 1px 8px;
+      border-radius: 48px;
+      border: 2px solid #9c8969;
+      transform: translateY(-2px);
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+      animation: popup 0.2s ease-out forwards;
+      opacity: 0;
+      animation-delay: var(--delay, 0s);
+      cursor: pointer;
+    }
+
+    @keyframes popup {
+      0% {
+        transform: translateY(-10px) scale(0.8);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(-2px) scale(1);
+        opacity: 1;
+      }
+    }
+
+    .attribute:disabled::after {
+      animation: afterExit 0.3s ease forwards;
+      pointer-events: none;
+      animation-delay: 0s !important;
+    }
+
+    @keyframes afterExit {
+      from {
+        opacity: 1;
+        transform: translateY(-2px) scale(1);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(10px) scale(0.8);
+      }
+    }
+
+    .inventory {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      align-items: center;
+      gap: 0.25em;
+      background-color: #f3e4c3;
+      border-radius: 0 0 3px 3px;
+    }
+
+    .box {
+      width: 48px;
+      height: 48px;
+      background-color: #64461f;
+      color: #f3e4c3;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100%;
-      width: 100%;
-      padding: 1em 0;
-    }
-
-    .attr-btn {
-      padding: 0.5em;
-      font-size: 0.7em;
-      cursor: pointer;
-      background-color: rgba(255, 255, 255, 0.1);
-      border: none;
-      border-radius: 3px;
-      color: white;
-    }
-
-    .attr-btn:disabled {
-      background-color: rgba(255, 255, 255, 0.05);
-      cursor: not-allowed;
-    }
-
-    .attr-btn:hover {
-      background-color: rgba(255, 255, 255, 0.3);
+      font-weight: bold;
+      border-radius: 12px;
+      box-shadow:
+        inset 4px 4px 8px rgba(0, 0, 0, 0.4),
+        inset -4px -4px 8px rgba(255, 255, 255, 0.1);
     }
   </style>
 </head>
 <body>
   <div id="app">
-    <main>
-      <section>
-        <div :style="{ color: nameColorStyle }" class="name-label">{{ username }}</div>
-        <div v-if="level">
-          <div>Nível: {{ level }}</div>
-          <div>HP: {{ hp.actual }} / {{ hp.max }}</div>
-          <div>Pontos disponíveis: {{ attributePoints }}</div>
+    <section v-if="!isPlaying" class="login">
+      <div v-if="!needsPermission" class="permission">
+        <span>Autorize o uso do seu nome para jogar.</span>
+        <button @click="requestAuthorization">Autorizar</button>
+      </div>
+      <div v-else class="join">
+        <span>{{ username }}</span>
+        <button @click="join">Entrar no jogo</button>
+      </div>
+    </section>
+    <div v-else class="tabs-container">
+      <nav>
+        <button
+          @click="tab = 'STATUS'"
+          :class="{ 'selected': tab === 'STATUS'}"
+          :style="{ color: nameColorStyle }">
+          {{ username }}
+        </button>
+        <button
+          @click="tab = 'INVENTORY'"
+          :class="{ 'selected': tab === 'INVENTORY'}">
+          Inventory
+        </button>
+      </nav>
+      <section v-if="tab === 'STATUS'" class="status" :class="{ 'is-playing': isPlaying }">
+        <label>Lv {{ level }}</label>
+        <label class="bar">
+          <div class="fill xp" :style="xpBarStyle"></div>
+          <span>XP</span>
+          <span>{{ experience }}/{{ experience_to_next_level }}</span>
+          <span>XP</span>
+        </label>
 
-          <div class="stat" v-for="(value, key) in attributes" :key="key">
-            <span class="stat-name">{{ key.toUpperCase() }}:</span>
-            <span>{{ value }}</span>
-            <button
-              v-if="attributePoints > 0"
-              class="attr-btn"
-              @click="upgradeAttribute(key)"
-            >+</button>
-          </div>
-        </div>
-        <div class="login" v-else>
-          <button
-            v-if="username !== ''"
-            class="attr-btn"
-            @click="join">
-            Entrar no jogo
-          </button>
-        </div>
+        <label class="bar">
+          <div class="fill hp" :style="hpBarStyle"></div>
+          <span>HP</span>
+          <span>{{ hp.actual }}/{{ hp.max }}</span>
+          <span>HP</span>
+        </label>
+
+        <label>Points {{ attributePoints }}</label>
+        <label
+          class="attribute"
+          :style="`--delay: ${index * 0.2}s`"
+          :class="{ 'with-points': attributePoints > 0 }"
+          :disabled="attributePoints === 0"
+          v-for="(value, attr, index) in attributes"
+          @click="upgradeAttribute(attr)">
+          <span>{{ attr.slice(0, 3).toUpperCase() }}</span>
+          <span></span>
+          <span>{{ value }}</span>
+        </label>
       </section>
-    </main>
+      <section v-if="tab === 'INVENTORY'" class="inventory" :class="{ 'is-playing': isPlaying }">
+        <div
+          v-for="n in 48"
+          :key="n"
+          class="box"></div>
+      </section>
+    </div>
   </div>
 
   <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
@@ -131,10 +317,16 @@
     createApp({
       data() {
         return {
-          username: '',
+          debug: false,
+          tab: 'STATUS',
+          needsPermission: true,
+          retractStatusBar: false,
+          username: undefined || 'digimoes',
           playerColor: '',
           level: 0,
-          hp: { actual: 0, max: 0 },
+          experience: 0,
+          experience_to_next_level: 0,
+          hp: { actual: 0, max: 100 },
           attributes: { strength: 0, agility: 0, vitality: 0, luck: 0 },
           attributePoints: 0,
           ws: null,
@@ -143,15 +335,11 @@
         };
       },
       computed: {
-        isWebSocketOpen() {
-          return (
-            typeof WebSocket !== 'undefined' &&
-            this.ws &&
-            this.ws.readyState === WebSocket.OPEN
-          );
+        isPlaying() {
+          return this.level > 0;
         },
         nameColorStyle() {
-          if (!this.playerColor) return '';
+          if (!this.playerColor) return 'rgb(209, 182, 145)';
           const parts = this.playerColor
             .replace(/[()]/g, '')
             .split(',')
@@ -161,15 +349,28 @@
 
           const [r, g, b, a] = parts;
           return `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
-        }
-      },
-      watch: {
-        isWebSocketOpen(newVal) {
-          if (newVal) {
-            this.log('WebSocket está aberto.');
-          } else {
-            this.log('WebSocket não está aberto.');
+        },
+        hpBarStyle() {
+          const percent = this.hp.max > 0 ? (this.hp.actual / this.hp.max) * 100 : 0;
+          let color = '#7cbb4e';
+
+          if (percent <= 33) {
+            color = '#db4c4c';
           }
+
+          return {
+            width: `calc(${percent}% - 12px)`,
+            backgroundColor: color
+          };
+        },
+        xpBarStyle() {
+          const percent = this.experience_to_next_level > 0
+            ? (this.experience / this.experience_to_next_level) * 100
+            : 0;
+
+          return {
+            width: `${Math.min(percent, 100)}%`
+          };
         }
       },
       methods: {
@@ -189,7 +390,7 @@
                 data.action === 'status_broadcast' &&
                 data.status.name.toLowerCase() === this.username.toLowerCase()
               ) {
-                this.updateStatus(data.status);
+                this.delayedUpdateStatus(data.status);
                 this.playerColor = data.status.color;
               }
             } catch (e) {
@@ -200,7 +401,7 @@
           this.ws.onerror = () => this.log('Erro no WebSocket.');
           this.ws.onclose = () => {
             this.log('WebSocket desconectado. Reconectando em 3s...');
-            setTimeout(this.connectWebSocket, 3000);
+            setTimeout(this.connectWebSocket, 1000);
           };
         },
         join() {
@@ -217,12 +418,14 @@
             });
             const data = await res.json();
             this.username = data.username;
+            this.needsPermission = this.username === undefined;
             if (data.status) {
               this.updateStatus(data.status);
               this.playerColor = data.status.color;
             }
           } catch (e) {
-            this.username = 'Erro';
+            this.needsPermission = true;
+            this.username = '';
             this.log('Erro ao buscar usuário.');
           }
         },
@@ -231,6 +434,8 @@
             status.color = '(255, 255, 255, 1)';
             this.playerColor = null;
             this.level = 0;
+            this.experience = 0;
+            this.experience_to_next_level = 0;
             this.hp = { actual: 0, max: 0 };
             this.attributePoints = 0;
             this.attributes = {
@@ -243,17 +448,33 @@
           }
 
           this.level = status.level;
+          this.experience = status.experience;
+          this.experience_to_next_level = status.experience_to_next_level;
           this.hp = {
             actual: status.actual_health,
             max: status.max_health
           };
           this.attributePoints = status.available_stat_points || 0;
+          if (this.attributePoints > 0) {
+            this.retractStatusBar = true;
+          } else {
+            setTimeout(() => {
+              if (this.attributePoints === 0) {
+                this.retractStatusBar = false;
+              }
+            }, 400);
+          }
           this.attributes = {
             strength: status.attributes.strength,
             agility: status.attributes.agility,
             vitality: status.attributes.vitality,
             luck: status.attributes.luck
           };
+        },
+        delayedUpdateStatus(newStatus) {
+          this.updateTimeout = setTimeout(() => {
+            this.updateStatus(newStatus);
+          }, 2000);
         },
         upgradeAttribute(attr) {
           if (this.attributePoints > 0) {
@@ -281,6 +502,10 @@
             this.log(`Enviado: ${JSON.stringify(command)}`);
           }
         },
+        requestAuthorization() {
+          window.Twitch.ext.actions.requestIdShare();
+          this.log('Solicitação de autorização enviada.');
+        }
       },
       mounted() {
         this.connectWebSocket();
