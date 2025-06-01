@@ -10,7 +10,7 @@
       margin: 0;
       padding: 0;
       font-family: sans-serif;
-      font-size: 18px;
+      font-size: 16px;
       color: #64461f;
       background-color: #553c14;
     }
@@ -67,7 +67,7 @@
       padding: 0.25em;
       background-color: #f3e4c3;
       border-top: none;
-      height: calc(100vh - 41px - 1.5em);
+      height: calc(100vh - 36px - 1.5em);
       border-radius: 8px;
       overflow-y: auto;
     }
@@ -100,9 +100,9 @@
     }
 
     label {
-      height: 24px;
+      min-height: 16px;
       font-weight: bold;
-      font-size: 1.2em;
+      font-size: 1em;
       color: #fff8d3;
       background-color: #9c8969;
       padding: 0.25em 0.75em;
@@ -173,16 +173,19 @@
     }
 
     .attribute.with-points::after {
+      width: 18px;
+      height: 16px;
+      text-align: center;
       content: '+';
       position: absolute;
-      top: calc(50% - 14px);
-      right: -1.6em;
+      top: calc(50% - 10px);
+      right: -2em;
       color: #64461f;
       font-weight: bold;
       box-shadow:
         4px 4px 8px rgba(0, 0, 0, 0.4),
         -4px -4px 8px rgba(255, 255, 255, 0.1);
-      padding: 1px 8px;
+      padding: 2px 1px;
       border-radius: 48px;
       border: 2px solid #9c8969;
       transform: translateY(-2px);
@@ -321,7 +324,7 @@
           tab: 'STATUS',
           needsPermission: true,
           retractStatusBar: false,
-          username: undefined,
+          username: undefined || 'digimoes',
           playerColor: '',
           level: 0,
           experience: 0,
