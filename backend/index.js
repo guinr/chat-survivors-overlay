@@ -122,7 +122,7 @@ wss.on('connection', (ws) => {
       });
     }
 
-    if (["for", "agi", "vit", "sor"].includes(msg.action)) {
+    if (["for", "agi", "vit", "luc"].includes(msg.action)) {
       const { name, action, value } = msg;
 
       if (!name || !value) {

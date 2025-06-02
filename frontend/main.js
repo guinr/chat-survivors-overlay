@@ -3,7 +3,7 @@ const { createApp } = Vue;
 createApp({
   data() {
     return {
-      debug: false,
+      debug: true,
       tab: 'STATUS',
       needsPermission: true,
       retractStatusBar: false,
@@ -115,6 +115,9 @@ createApp({
         this.log('Erro ao buscar usuário.');
       }
     },
+    delayedUpdateStatus(status) {
+      setTimeout(() => this.updateStatus(status), this.debug ? 0 : 2000);
+    },
     updateStatus(status) {
       if (status.actual_health === 0) {
         status.color = '(255, 255, 255, 1)';
@@ -139,9 +142,6 @@ createApp({
         vitality: status.attributes.vitality,
         luck: status.attributes.luck
       };
-    },
-    delayedUpdateStatus(status) {
-      setTimeout(() => this.updateStatus(status), debug ? 0 : 2000);
     },
     upgradeAttribute(attr) {
       this.ws.send(JSON.stringify({
