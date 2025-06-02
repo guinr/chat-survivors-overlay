@@ -3,7 +3,7 @@ const { createApp } = Vue;
 createApp({
   data() {
     return {
-      debug: true,
+      debug: false,
       tab: 'STATUS',
       needsPermission: true,
       retractStatusBar: false,
