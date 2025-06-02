@@ -54,17 +54,28 @@
         </label>
 
         <label>Points {{ attributePoints }}</label>
-        <label
-          class="attribute"
-          v-for="(value, attr, index) in attributes"
-          :key="attr"
-          :style="`--delay: ${index * 0.2}s`"
-          :class="{ 'with-points': attributePoints > 0 }"
-          @click="upgradeAttribute(attr)">
-          <span>{{ attr.slice(0, 3).toUpperCase() }}</span>
-          <span></span>
-          <span>{{ value }}</span>
-        </label>
+        <div class="attributes">
+          <div
+            class="attribute"
+            v-for="(value, attr, index) in attributes">
+            <label
+              class="attribute-label"
+              :style="`--delay: ${index * 0.2}s`"
+              :class="{ 'with-point': attributePoints === 1, 'with-points': attributePoints > 1 }">
+              <span>{{ attr.slice(0, 3).toUpperCase() }}</span>
+              <span></span>
+              <span>{{ value }}</span>
+            </label>
+            <button
+              class="upgrade-button"
+              @click="upgradeAttribute(attr, true)"
+              >+{{ attributePoints }}</button>
+            <button
+              class="upgrade-button one"
+              @click="upgradeAttribute(attr)"
+              >+1</button>
+          </div>
+        </div>
       </section>
 
       <section v-if="tab === 'INVENTORY'" class="inventory" :class="{ 'is-playing': isPlaying }">

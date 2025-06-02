@@ -17,7 +17,7 @@ createApp({
       attributePoints: 0,
       ws: null,
       logs: [],
-      API_URL: 'https://chat-survivors-overlay-server.onrender.com'
+      API_URL: 'https://chat-survivors-overlay-server.onrender.com',
     };
   },
   computed: {
@@ -143,11 +143,11 @@ createApp({
         luck: status.attributes.luck
       };
     },
-    upgradeAttribute(attr) {
+    upgradeAttribute(attr, all = false) {
       this.ws.send(JSON.stringify({
         name: this.username,
         action: attr.slice(0, 3),
-        value: 1
+        value: all ? this.attributePoints : 1
       }));
       this.log(`Upgrade enviado: ${attr}`);
     },
@@ -162,7 +162,7 @@ createApp({
 
   const fallbackTimeout = setTimeout(() => {
     if (!this.username && this.debug) {
-      this.username = 'digimoes';
+      this.username = 'ChatSurvivors';
       this.needsPermission = false;
     }
   }, 2000);

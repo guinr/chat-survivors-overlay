@@ -26,7 +26,7 @@ button {
   font-weight: bold;
   background-color: #64461f;
   border: 1px solid transparent;
-  border-radius: 16px;
+  border-radius: 8px;
   padding: 0.5em 1em;
   box-shadow:
     4px 4px 8px rgba(0, 0, 0, 0.4),
@@ -101,7 +101,7 @@ label {
   color: #fff8d3;
   background-color: #9c8969;
   padding: 0.25em 0.75em;
-  border-radius: 16px;
+  border-radius: 8px;
   box-shadow:
     inset 4px 4px 8px rgba(0, 0, 0, 0.4),
     inset -4px -4px 8px rgba(255, 255, 255, 0.1);
@@ -149,6 +149,7 @@ label {
 }
 
 .bar > span:nth-child(3) {
+  min-width: 80%;
   text-align: center;
 }
 
@@ -156,68 +157,65 @@ label {
   opacity: 0;
 }
 
+.attributes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.25em;
+}
+
 .attribute {
-  width: calc(100% - 1.5em);
   position: relative;
   display: flex;
   justify-content: space-between;
   transition: width 0.3s ease;
+  overflow: hidden;
+  border-radius: 8px;
 }
 
-.attribute.with-points {
-  width: calc(100% - 1.5em - 35px);
+.attribute > .attribute-label {
+  min-width: 56px;
+  width: calc(100% - 1.5em);
+  height: 32px;
+  display: flex;
+  justify-content: space-between;
+  border: 2px solid transparent;
+  z-index: 2;
+  transition: width 0.3s ease;
 }
 
-.attribute.with-points::after {
-  width: 22px;
-  height: 20px;
-  text-align: center;
-  content: '+';
+.attribute > .attribute-label.with-point {
+  width: calc(100% - 1.5em - 46px);
+}
+
+.attribute > .attribute-label.with-points {
+  width: calc(100% - 1.5em - 87px);
+}
+
+.attribute > .upgrade-button {
   position: absolute;
-  top: calc(50% - 12px);
-  right: -2em;
-  color: #64461f;
-  font-weight: bold;
-  box-shadow:
-    4px 4px 8px rgba(0, 0, 0, 0.4),
-    -4px -4px 8px rgba(255, 255, 255, 0.1);
-  padding: 2px 0 0 0;
-  border-radius: 48px;
-  border: 2px solid #9c8969;
-  transform: translateY(-2px);
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
-  animation: popup 0.2s ease-out forwards;
-  opacity: 0;
-  animation-delay: var(--delay, 0s);
-  cursor: pointer;
+  right: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 44px;
+  padding-left: 30px;
+  background-color: #9c8969;
+  box-shadow: 4px 0px 8px rgba(0, 0, 0, 0.4);
+  z-index: 1;
+  transition: right 0.3s ease;
 }
 
-@keyframes popup {
-  0% {
-    transform: translateY(-10px) scale(0.8);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(-2px) scale(1);
-    opacity: 1;
-  }
+.attribute > .upgrade-button:active {
+  opacity: 0.8;
+  box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.4),
+              inset -4px -4px 8px rgba(255, 255, 255, 0.1);
 }
 
-.attribute:disabled::after {
-  animation: afterExit 0.3s ease forwards;
-  pointer-events: none;
-  animation-delay: 0s !important;
-}
-
-@keyframes afterExit {
-  from {
-    opacity: 1;
-    transform: translateY(-2px) scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(10px) scale(0.8);
-  }
+.attribute > .upgrade-button.one {
+  right: 0;
+  background-color: #64461f;
+  z-index: 0;
 }
 
 .inventory {
