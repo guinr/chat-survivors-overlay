@@ -132,22 +132,22 @@ createApp({
       this.experience = status.experience;
       this.experience_to_next_level = status.experience_to_next_level;
       this.hp = { actual: status.actual_health, max: status.max_health };
-      this.attributePoints = status.attribute_points;
+      this.attributePoints = status.available_stat_points;
       this.attributes = {
-        strength: status.strength,
-        agility: status.agility,
-        vitality: status.vitality,
-        luck: status.luck
+        strength: status.attributes.strength,
+        agility: status.attributes.agility,
+        vitality: status.attributes.vitality,
+        luck: status.attributes.luck
       };
     },
     delayedUpdateStatus(status) {
-      setTimeout(() => this.updateStatus(status), 100);
+      setTimeout(() => this.updateStatus(status), debug ? 0 : 2000);
     },
     upgradeAttribute(attr) {
       this.ws.send(JSON.stringify({
         name: this.username,
-        action: 'upgrade',
-        attribute: attr
+        action: attr.slice(0, 3),
+        value: 1
       }));
       this.log(`Upgrade enviado: ${attr}`);
     },
@@ -162,11 +162,8 @@ createApp({
 
   const fallbackTimeout = setTimeout(() => {
     if (!this.username && this.debug) {
-      this.level = 1;
-      this.username = 'DEBUG_USER';
+      this.username = 'digimoes';
       this.needsPermission = false;
-      this.debug = true;
-      this.log('Modo DEBUG ativado por timeout.');
     }
   }, 2000);
 
