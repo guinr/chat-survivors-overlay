@@ -10,23 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const server = http.createServer(app);
-const wss = new WebSocketServer({
-  server,
-  verifyClient: (info, done) => {
-    const origin = info.origin || '';
-    console.log('🛡️ Verificando origem:', origin);
-
-    if (
-      origin === 'https://extension-files.twitch.tv' ||
-      origin.endsWith('.ext-twitch.tv')
-    ) {
-      done(true);
-    } else {
-      console.log('⛔ Origem bloqueada:', origin);
-      done(false, 403, 'Forbidden');
-    }
-  }
-});
+const wss = new WebSocketServer({ server });
 
 app.use(cors());
 
